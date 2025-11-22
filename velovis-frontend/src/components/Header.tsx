@@ -1,18 +1,14 @@
-"use client"; 
+"use client";
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '../app/lib/store/auth.store'; 
-import { useCartStore } from '../app/lib/store/cart.store';
-import api from '../app/lib/api'; 
-import { Menu, Transition } from '@headlessui/react'; // 1. Headless UI'ı import et
-import { Fragment } from 'react'; // 2. Fragment'i import et
-import { ChevronDownIcon } from '@heroicons/react/20/solid'; // 3. Küçük bir ok ikonu (opsiyonel ama güzel)
+import { useAuthStore } from 'src/app/lib/store/auth.store';
+import { useCartStore } from 'src/app/lib/store/cart.store';
+import api from 'src/app/lib/api';
+import { Menu, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
+import { ChevronDownIcon } from '@heroicons/react/20/solid';
 
-// İkon kütüphanesi yüklü değilse yükleyelim:
-// Terminalde: npm install @heroicons/react
-
-// (PERMISSIONS objesi burada durabilir, değişmedi)
 const PERMISSIONS = {
   ROLES: {
     READ: 'roles:read',
@@ -20,25 +16,23 @@ const PERMISSIONS = {
 };
 
 export default function Header() {
-  
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
   const tokens = useAuthStore((state) => state.tokens);
   const logout = useAuthStore((state) => state.logout);
-  
+
   const cartItems = useCartStore((state) => state.items);
   const totalItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   const router = useRouter();
-
-  const hasAdminAccess = user?.permissions.includes(PERMISSIONS.ROLES.READ);
+  const hasAdminAccess = user?.permissions?.includes(PERMISSIONS.ROLES.READ);
 
   const handleLogout = async () => {
-    if (!tokens) return; 
+    if (!tokens) return;
     try {
       await api.post('/auth/logout', { refreshToken: tokens.refreshToken });
     } catch (error) {
-      console.error("Logout sırasında backend'de hata oluştu:", error);
+      console.error("Logout hatası:", error);
     } finally {
       logout();
       router.push('/');
@@ -46,49 +40,49 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-gray-800 shadow-md">
-      <nav className="container mx-auto flex items-center justify-between p-4">
-        <Link href="/" className="text-2xl font-bold text-blue-400">
+    // TEMA GÜNCELLEMESİ: bg-black, border-zinc-900 (Siyah ve İnce Çizgili)
+    <header className="bg-black/90 backdrop-blur-md border-b border-zinc-900 sticky top-0 z-50 transition-all duration-300">
+      <nav className="container mx-auto flex items-center justify-between px-6 py-4">
+        
+        {/* 1. LOGO: Yeni Minimal Font */}
+        <Link href="/" className="text-2xl font-light tracking-[0.2em] text-white uppercase hover:opacity-80 transition-opacity">
           Velovis
         </Link>
 
-        <div className="flex items-center space-x-6"> {/* Aralığı biraz açtık */}
+        {/* 2. ORTA MENÜ (YENİ EKLENDİ) */}
+        <div className="hidden md:flex items-center space-x-8">
+          <Link href="/products" className="text-xs uppercase tracking-widest text-zinc-400 hover:text-white transition-colors">
+            Koleksiyon
+          </Link>
+          <Link href="/about" className="text-xs uppercase tracking-widest text-zinc-400 hover:text-white transition-colors">
+            Hakkında
+          </Link>
+        </div>
+
+        {/* 3. SAĞ TARAF (Sepet & Profil) */}
+        <div className="flex items-center space-x-6">
           
-          <Link href="/cart" className="text-gray-300 hover:text-white relative">
-            Sepet ({totalItemCount})
+          {/* SEPET */}
+          <Link href="/cart" className="text-zinc-400 hover:text-white relative transition-colors group">
+            <span className="text-xs uppercase tracking-widest group-hover:underline underline-offset-4">Sepet</span>
             {totalItemCount > 0 && (
-              <span className="absolute -top-2 -right-3 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs text-white">
+              // TEMA GÜNCELLEMESİ: Mavi top yerine Beyaz top, siyah yazı
+              <span className="absolute -top-3 -right-3 flex h-4 w-4 items-center justify-center rounded-full bg-white text-[10px] font-bold text-black shadow-sm">
                 {totalItemCount}
               </span>
             )}
           </Link>
 
-          {/* === ADMİN PANELİ LİNKİ (Değişmedi) === */}
-          {isAuthenticated && hasAdminAccess && (
-            <Link 
-              href="/admin/dashboard" 
-              className="rounded-md bg-green-600 px-3 py-1 text-sm font-bold text-white hover:bg-green-700"
-            >
-              Admin Paneli
-            </Link>
-          )}
-
+          {/* PROFİL MENÜSÜ */}
           {isAuthenticated && user ? (
-            // =================================================================
-            // === DEĞİŞİKLİK BURADA BAŞLIYOR (DROPDOWN MENÜ) ===
-            // =================================================================
             <Menu as="div" className="relative inline-block text-left">
               <div>
-                <Menu.Button className="inline-flex w-full justify-center rounded-md px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white focus:outline-none">
-                  Merhaba, {user.fullName}
-                  <ChevronDownIcon
-                    className="-mr-1 ml-2 h-5 w-5"
-                    aria-hidden="true"
-                  />
+                <Menu.Button className="inline-flex w-full justify-center items-center text-xs font-medium uppercase tracking-widest text-zinc-400 hover:text-white focus:outline-none transition-colors">
+                  <span className="mr-1 max-w-[100px] truncate">{user.fullName}</span>
+                  <ChevronDownIcon className="h-4 w-4 text-zinc-500 group-hover:text-white" aria-hidden="true" />
                 </Menu.Button>
               </div>
 
-              {/* Açılır menü geçişi (animasyonlu) */}
               <Transition
                 as={Fragment}
                 enter="transition ease-out duration-100"
@@ -98,41 +92,87 @@ export default function Header() {
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
               >
-                <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-600 rounded-md bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                  <div className="px-1 py-1">
-                    <Menu.Item>
-                      {({ active }) => (
-                        <Link
-                          href="/account"
-                          className={`${
-                            active ? 'bg-blue-600 text-white' : 'text-gray-300'
-                          } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                        >
-                          Hesabım
-                        </Link>
-                      )}
-                    </Menu.Item>
+                {/* TEMA GÜNCELLEMESİ: Dropdown Siyah/Gri */}
+                <Menu.Items className="absolute right-0 mt-4 w-56 origin-top-right divide-y divide-zinc-800 rounded-none border border-zinc-800 bg-black shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+                  
+                  {/* ADMIN BÖLÜMÜ */}
+                  {hasAdminAccess && (
+                    <div className="px-1 py-1 bg-zinc-900/50">
+                      <Menu.Item>
+                        {({ active }) => (
+                          <Link
+                            href="/admin/dashboard"
+                            className={`${
+                              active ? 'bg-white text-black' : 'text-zinc-300'
+                            } group flex w-full items-center px-4 py-3 text-xs uppercase tracking-widest transition-colors`}
+                          >
+                            Admin Paneli
+                          </Link>
+                        )}
+                      </Menu.Item>
+                      <Menu.Item>
+                        {({ active }) => (
+                          <Link
+                            href="/admin/orders"
+                            className={`${
+                              active ? 'bg-white text-black' : 'text-zinc-300'
+                            } group flex w-full items-center px-4 py-3 text-xs uppercase tracking-widest transition-colors`}
+                          >
+                            Sipariş Yönetimi
+                          </Link>
+                        )}
+                      </Menu.Item>
+                      <Menu.Item>
+      {({ active }) => (
+        <Link
+          href="/admin/products"
+          className={`${
+            active ? 'bg-white text-black' : 'text-zinc-300'
+          } group flex w-full items-center px-4 py-3 text-xs uppercase tracking-widest transition-colors`}
+        >
+          Ürün Yönetimi
+        </Link>
+      )}
+    </Menu.Item>
+                    </div>
+                  )}
+
+                  {/* KULLANICI BÖLÜMÜ */}
+                  <div className="py-1">
                     <Menu.Item>
                       {({ active }) => (
                         <Link
                           href="/orders"
                           className={`${
-                            active ? 'bg-blue-600 text-white' : 'text-gray-300'
-                          } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                            active ? 'bg-zinc-900 text-white' : 'text-zinc-400'
+                          } group flex w-full items-center px-4 py-3 text-xs uppercase tracking-widest transition-colors`}
                         >
                           Siparişlerim
                         </Link>
                       )}
                     </Menu.Item>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <Link
+                          href="/account"
+                          className={`${
+                            active ? 'bg-zinc-900 text-white' : 'text-zinc-400'
+                          } group flex w-full items-center px-4 py-3 text-xs uppercase tracking-widest transition-colors`}
+                        >
+                          Hesabım
+                        </Link>
+                      )}
+                    </Menu.Item>
                   </div>
-                  <div className="px-1 py-1">
+                  
+                  <div className="py-1 border-t border-zinc-800">
                     <Menu.Item>
                       {({ active }) => (
                         <button
                           onClick={handleLogout}
                           className={`${
-                            active ? 'bg-red-600 text-white' : 'text-red-400'
-                          } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                            active ? 'bg-red-900/20 text-red-400' : 'text-red-500'
+                          } group flex w-full items-center px-4 py-3 text-xs uppercase tracking-widest transition-colors`}
                         >
                           Çıkış Yap
                         </button>
@@ -142,22 +182,14 @@ export default function Header() {
                 </Menu.Items>
               </Transition>
             </Menu>
-            // =================================================================
-            // === DEĞİŞİKLİK BURADA BİTİYOR ===
-            // =================================================================
           ) : (
-            // Giriş yapmamışsa:
-            <>
-              <Link href="/login" className="text-gray-300 hover:text-white">
-                Giriş Yap
-              </Link>
-              <Link
-                href="/register"
-                className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-              >
+            // GİRİŞ YAPMAMIŞ KULLANICI
+            <div className="flex items-center space-x-6 text-xs uppercase tracking-widest">
+              <Link href="/login" className="text-zinc-400 hover:text-white transition-colors">Giriş</Link>
+              <Link href="/register" className="border border-white px-4 py-2 text-white hover:bg-white hover:text-black transition-all duration-300">
                 Kayıt Ol
               </Link>
-            </>
+            </div>
           )}
         </div>
       </nav>

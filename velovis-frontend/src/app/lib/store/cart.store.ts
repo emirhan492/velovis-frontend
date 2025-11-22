@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import api from '../api'; // Bizim "akıllı" (auth-aware) API istemcimiz
+import  api  from '../api'; // Bizim "akıllı" (auth-aware) API istemcimiz
 import { useAuthStore } from './auth.store';
 
 export type CartItem = {
@@ -56,12 +56,12 @@ export const useCartStore = create<CartState>((set, get) => ({
   // =================================================================
   // SEPETE EKLE (addItem)
   // =================================================================
-  addItem: async (productId: string, quantity: number) => {
+  addItem: async (productId: string, quantity: number, size: string) => {
     set({ isLoading: true, error: null });
     try {
       const { data: updatedOrNewItem } = await api.post<CartItem>(
         '/cart-items',
-        { productId, quantity }
+        { productId, quantity, size }
       );
       
       const currentItems = get().items;

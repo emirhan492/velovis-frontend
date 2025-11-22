@@ -1,45 +1,37 @@
-"use client"; // Hook'ları (useState, useMutation) kullanmak için
+"use client";
 
-import { useAuthStore } from "../lib/store/auth.store"; // Göreceli yolla Global Hafızamız
-import { useMutation } from "@tanstack/react-query"; // 1. useMutation'ı import et
-import api from "../lib/api"; // 2. API istemcimizi import et
-import { useState } from "react"; // 3. useState'i import et
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid'; // 4. Göz ikonlarını import et
+import { useAuthStore } from "../lib/store/auth.store";
+import { useMutation } from "@tanstack/react-query";
+import api from "../lib/api";
+import { useState } from "react";
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
 
 // =================================================================
-// ŞİFRE DEĞİŞTİRME FORMU ALT COMPONENT'İ
+// ŞİFRE DEĞİŞTİRME FORMU (AYNEN KALDI)
 // =================================================================
 function ChangePasswordForm() {
-  // Form state'leri
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   
-  // Başarı/Hata state'leri
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // API İsteği (Mutation)
   const mutation = useMutation({
     mutationFn: () => {
-      // Backend'de oluşturduğumuz yeni endpoint'i çağır
       return api.patch('/auth/change-password', {
         currentPassword,
         newPassword,
       });
     },
     onSuccess: (data) => {
-      // Başarılı olursa
       setSuccess((data.data as any).message || "Şifre başarıyla güncellendi.");
       setError(null);
       setCurrentPassword("");
       setNewPassword("");
-      // (Backend tüm oturumları kapattığı için kullanıcıyı logout'a zorlayabiliriz,
-      // ama şimdilik sadece mesaj gösterelim)
     },
     onError: (err: any) => {
-      // Hata olursa (örn: 403 Mevcut şifre yanlış)
       const message = err.response?.data?.message || "Bir hata oluştu.";
       setError(message);
       setSuccess(null);
@@ -54,86 +46,85 @@ function ChangePasswordForm() {
     }
     setError(null);
     setSuccess(null);
-    mutation.mutate(); // API isteğini tetikle
+    mutation.mutate();
   };
 
   return (
-    <div className="mt-8 max-w-lg rounded-lg bg-gray-800 p-6 shadow">
-      <h2 className="text-2xl font-semibold">Şifre Değiştir</h2>
-      <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+    <div className="border border-zinc-800 p-8 bg-zinc-900/20">
+      <h2 className="text-xl font-light uppercase tracking-widest mb-8 border-b border-zinc-800 pb-2">
+        Güvenlik Ayarları
+      </h2>
+      
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Mevcut Şifre */}
         <div>
-          <label
-            htmlFor="currentPassword"
-            className="block text-sm font-medium text-gray-300"
-          >
+          <label htmlFor="currentPassword" className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">
             Mevcut Şifre
           </label>
-          <div className="relative mt-1">
+          <div className="relative">
             <input
               id="currentPassword"
               type={showCurrent ? "text" : "password"}
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               required
-              className="block w-full rounded-md border-gray-700 bg-gray-900 p-2 pr-10 text-white"
+              className="block w-full bg-zinc-950 border border-zinc-800 p-4 text-white placeholder-zinc-700 focus:outline-none focus:border-zinc-500 transition-colors"
+              placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setShowCurrent(!showCurrent)}
-              className="absolute inset-y-0 right-0 flex items-center pr-3"
+              className="absolute inset-y-0 right-0 flex items-center pr-4 text-zinc-500 hover:text-white transition-colors"
             >
-              {showCurrent ? <EyeSlashIcon className="h-5 w-5 text-gray-400" /> : <EyeIcon className="h-5 w-5 text-gray-400" />}
+              {showCurrent ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
             </button>
           </div>
         </div>
 
         {/* Yeni Şifre */}
         <div>
-          <label
-            htmlFor="newPassword"
-            className="block text-sm font-medium text-gray-300"
-          >
-            Yeni Şifre (En az 8 karakter)
+          <label htmlFor="newPassword" className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">
+            Yeni Şifre (Min. 8 Karakter)
           </label>
-          <div className="relative mt-1">
+          <div className="relative">
             <input
               id="newPassword"
               type={showNew ? "text" : "password"}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
-              className="block w-full rounded-md border-gray-700 bg-gray-900 p-2 pr-10 text-white"
+              className="block w-full bg-zinc-950 border border-zinc-800 p-4 text-white placeholder-zinc-700 focus:outline-none focus:border-zinc-500 transition-colors"
+              placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setShowNew(!showNew)}
-              className="absolute inset-y-0 right-0 flex items-center pr-3"
+              className="absolute inset-y-0 right-0 flex items-center pr-4 text-zinc-500 hover:text-white transition-colors"
             >
-              {showNew ? <EyeSlashIcon className="h-5 w-5 text-gray-400" /> : <EyeIcon className="h-5 w-5 text-gray-400" />}
+              {showNew ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
             </button>
           </div>
         </div>
 
-        {/* Başarı mesajı alanı */}
+        {/* Mesaj Alanları */}
         {success && (
-          <div className="rounded-md bg-green-800 p-3 text-center text-green-100">
+          <div className="p-3 border border-green-900/50 bg-green-900/10 text-green-400 text-xs text-center uppercase tracking-wide">
             {success}
           </div>
         )}
-        {/* Hata mesajı alanı */}
         {error && (
-          <div className="rounded-md bg-red-800 p-3 text-center text-red-100">
+          <div className="p-3 border border-red-900/50 bg-red-900/10 text-red-400 text-xs text-center uppercase tracking-wide">
             {error}
           </div>
         )}
 
+        {/* Buton */}
         <button
           type="submit"
           disabled={mutation.isPending}
-          className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+          className="w-full py-4 bg-white text-black font-bold uppercase tracking-[0.2em] hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {mutation.isPending ? 'Güncelleniyor...' : 'Şifreyi Güncelle'}
+          {mutation.isPending ? 'İşleniyor...' : 'Şifreyi Güncelle'}
         </button>
       </form>
     </div>
@@ -142,61 +133,104 @@ function ChangePasswordForm() {
 
 
 // =================================================================
-// ANA "Hesabım" SAYFASI COMPONENT'İ
+// ANA "Hesabım" SAYFASI
 // =================================================================
 export default function AccountPage() {
-  
   const user = useAuthStore((state) => state.user);
 
   if (!user) {
     return (
-        <main className="container mx-auto p-4">
-            <h1 className="text-3xl font-bold text-blue-400">Hesabım</h1>
-            <p className="mt-4 text-yellow-400">Kullanıcı bilgileri yükleniyor...</p>
-        </main>
+        <div className="min-h-screen bg-black text-white flex items-center justify-center pt-24">
+            <div className="animate-pulse tracking-widest text-sm uppercase">Hesap Bilgileri Yükleniyor...</div>
+        </div>
     );
   }
 
-  return (
-    <main className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold text-blue-400">Hesabım</h1>
-      <p className="mt-2 text-lg text-gray-400">
-        Hoş geldin, {user.fullName}. Buradan hesap bilgilerini yönetebilirsin.
-      </p>
+  // Kullanıcının ADMIN olup olmadığını kontrol ediyoruz
+  const isAdmin = user.roles && user.roles.includes('ADMIN');
 
-      {/* Grid yapısı ekleyelim (yan yana dursunlar) */}
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+  return (
+    <main className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black pt-24 pb-20">
+      <div className="container mx-auto px-6">
         
-        {/* Sol Taraf: Profil Bilgileri */}
-        <div className="rounded-lg bg-gray-800 p-6 shadow">
-          <h2 className="text-2xl font-semibold">Profil Bilgileri</h2>
-          <div className="mt-4 space-y-3">
-            <div>
-              <span className="block text-sm font-medium text-gray-400">Tam Ad</span>
-              <span className="block text-lg text-white">{user.fullName}</span>
-            </div>
-            <div>
-              <span className="block text-sm font-medium text-gray-400">Kullanıcı Adı</span>
-              <span className="block text-lg text-white">{user.username}</span>
-            </div>
-            <div>
-              <span className="block text-sm font-medium text-gray-400">E-posta</span>
-              <span className="block text-lg text-white">{user.email}</span>
-            </div>
-            {user.roles && user.roles.length > 0 && (
-              <div>
-                <span className="block text-sm font-medium text-gray-400">Roller</span>
-                <span className="block text-lg text-white">
-                  {user.roles.join(', ')}
-                </span>
-              </div>
-            )}
+        {/* BAŞLIK ALANI */}
+        <div className="mb-12">
+          <h1 className="text-4xl md:text-6xl font-light tracking-tighter mb-4">
+            HESABIM
+          </h1>
+          <div className="h-px w-full bg-zinc-800"></div>
+          <div className="flex justify-between items-center mt-4 text-sm text-zinc-500 uppercase tracking-widest">
+            <span>Üyelik Detayları</span>
+            <span>Aktif</span>
           </div>
         </div>
 
-        {/* Sağ Taraf: Şifre Değiştirme Formu */}
-        <ChangePasswordForm />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
+          
+          {/* SOL TARAF: PROFİL BİLGİLERİ */}
+          <div>
+            <div className="border border-zinc-800 p-8 bg-zinc-900/20 h-full">
+              <h2 className="text-xl font-light uppercase tracking-widest mb-8 border-b border-zinc-800 pb-2">
+                Kişisel Bilgiler
+              </h2>
+              
+              <div className="space-y-8">
+                {/* İsim */}
+                <div className="group">
+                  <span className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1 group-hover:text-white transition-colors">
+                    Ad Soyad
+                  </span>
+                  <span className="block text-2xl font-light text-white">
+                    {user.fullName}
+                  </span>
+                </div>
 
+                {/* Kullanıcı Adı */}
+                <div className="group">
+                   <span className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1 group-hover:text-white transition-colors">
+                    Kullanıcı Adı
+                  </span>
+                  <span className="block text-xl font-mono text-zinc-300">
+                    @{user.username}
+                  </span>
+                </div>
+
+                {/* E-posta */}
+                <div className="group">
+                   <span className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1 group-hover:text-white transition-colors">
+                    E-Posta Adresi
+                  </span>
+                  <span className="block text-lg text-zinc-300">
+                    {user.email}
+                  </span>
+                </div>
+
+                {/* Roller - SADECE ADMIN GÖREBİLİR */}
+                {/* Değişiklik burada yapıldı: Sadece isAdmin true ise göster */}
+                {isAdmin && (
+                  <div className="pt-4 border-t border-zinc-800/50">
+                     <span className="block text-xs font-bold text-red-500 uppercase tracking-widest mb-2">
+                      Yetki Seviyesi (Admin Görünümü)
+                    </span>
+                    <div className="flex gap-2">
+                      {user.roles.map((role) => (
+                        <span key={role} className="border border-red-900/50 bg-red-900/10 text-red-400 px-3 py-1 text-xs uppercase tracking-widest">
+                          {role}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* SAĞ TARAF: ŞİFRE FORMU */}
+          <div>
+            <ChangePasswordForm />
+          </div>
+
+        </div>
       </div>
     </main>
   );

@@ -1,11 +1,11 @@
-"use client"; // Bu, tarayıcıda çalışan, interaktif bir sayfadır.
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import api from "../lib/api"; // Göreceli yolla API istemcimiz
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid'; // İkonları import et
+import Link from "next/link"; // Link componentini ekledik (Giriş sayfasına yönlendirme için)
+import api from "../lib/api";
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
 
-// Formdaki tüm alanlar için bir state objesi
 const initialFormState = {
   firstName: "",
   lastName: "",
@@ -20,12 +20,10 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Şifre görünürlüğü için state
   const [showPassword, setShowPassword] = useState(false);
   
   const router = useRouter();
 
-  // Formdaki herhangi bir alanı güncellemek için
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -34,7 +32,6 @@ export default function RegisterPage() {
     }));
   };
 
-  // Form gönderildiğinde çalışacak fonksiyon
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -42,14 +39,11 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      // Backend'e kayıt isteği at
-      await api.post('/auth/register', formData);
+      await api.post('auth/register', formData);
 
-      // Başarılı olduysa...
-      setSuccess("Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...");
-      setFormData(initialFormState); // Formu temizle
+      setSuccess("Kayıt başarılı. Lütfen e-postanızı kontrol edin.");
+      setFormData(initialFormState);
 
-      // 2 saniye bekle ve kullanıcıyı giriş sayfasına yönlendir
       setTimeout(() => {
         router.push('/login');
       }, 2000);
@@ -66,122 +60,154 @@ export default function RegisterPage() {
     }
   };
 
+  // Ortak Input Stili
+  const inputClassName = "block w-full bg-zinc-950 border border-zinc-800 p-4 text-white placeholder-zinc-700 focus:outline-none focus:border-zinc-500 transition-colors";
+  const labelClassName = "block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2";
+
   return (
-    <main className="container mx-auto max-w-sm p-4">
-      <h1 className="text-3xl font-bold text-center text-blue-400">Kayıt Ol</h1>
+    <main className="min-h-screen bg-black text-white flex items-center justify-center px-4 py-20">
       
-      <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+      <div className="w-full max-w-md space-y-8">
         
-        {/* --- EKSİK OLAN KISIMLAR BURADA --- */}
-        {/* İsim */}
-        <div className="flex space-x-4">
-          <div className="flex-1">
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-300">İsim</label>
+        {/* BAŞLIK */}
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-light tracking-tighter">
+            VELOVIS
+          </h1>
+          <p className="text-xs font-bold text-zinc-500 uppercase tracking-[0.3em]">
+            Yeni Üyelik
+          </p>
+        </div>
+      
+        <form onSubmit={handleSubmit} className="mt-12 space-y-6">
+          
+          {/* İsim & Soyisim (Yan Yana) */}
+          <div className="flex space-x-4">
+            <div className="flex-1">
+              <label htmlFor="firstName" className={labelClassName}>İsim</label>
+              <input
+                id="firstName"
+                name="firstName"
+                type="text"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+                className={inputClassName}
+                placeholder="Adınız"
+              />
+            </div>
+            <div className="flex-1">
+              <label htmlFor="lastName" className={labelClassName}>Soyisim</label>
+              <input
+                id="lastName"
+                name="lastName"
+                type="text"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+                className={inputClassName}
+                placeholder="Soyadınız"
+              />
+            </div>
+          </div>
+          
+          {/* Kullanıcı Adı */}
+          <div>
+            <label htmlFor="username" className={labelClassName}>Kullanıcı Adı</label>
             <input
-              id="firstName"
-              name="firstName"
+              id="username"
+              name="username"
               type="text"
-              value={formData.firstName}
+              value={formData.username}
               onChange={handleChange}
               required
-              className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 p-2 text-white"
+              className={inputClassName}
+              placeholder="kullaniciadi"
             />
           </div>
-          <div className="flex-1">
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-300">Soyisim</label>
+          
+          {/* E-posta */}
+          <div>
+            <label htmlFor="email" className={labelClassName}>E-posta</label>
             <input
-              id="lastName"
-              name="lastName"
-              type="text"
-              value={formData.lastName}
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
               onChange={handleChange}
               required
-              className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 p-2 text-white"
+              className={inputClassName}
+              placeholder="ornek@email.com"
             />
           </div>
-        </div>
-        
-        {/* Kullanıcı Adı */}
-        <div>
-          <label htmlFor="username" className="block text-sm font-medium text-gray-300">Kullanıcı Adı</label>
-          <input
-            id="username"
-            name="username"
-            type="text"
-            value={formData.username}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 p-2 text-white"
-          />
-        </div>
-        
-        {/* E-posta */}
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-300">E-posta</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 p-2 text-white"
-          />
-        </div>
-        {/* --- EKSİK KISIMLAR BİTTİ --- */}
 
+          {/* Parola */}
+          <div>
+            <label htmlFor="password" className={labelClassName}>Parola</label>
+            <div className="relative">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                value={formData.password}
+                onChange={handleChange}
+                required
+                minLength={8}
+                className={`${inputClassName} pr-12`} // Göz ikonu için sağdan boşluk
+                placeholder="••••••••"
+              />
+              <button
+                type="button" 
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-4 text-zinc-500 hover:text-white transition-colors"
+              >
+                {showPassword ? (
+                  <EyeSlashIcon className="h-5 w-5" />
+                ) : (
+                  <EyeIcon className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+            <p className="mt-2 text-[10px] text-zinc-600 uppercase tracking-wider">
+              En az 8 karakter uzunluğunda olmalıdır.
+            </p>
+          </div>
 
-        {/* Parola (Göz ikonuyla birlikte) */}
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-300">Parola</label>
-          <div className="relative mt-1">
-            <input
-              id="password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              value={formData.password}
-              onChange={handleChange}
-              required
-              minLength={8}
-              className="block w-full rounded-md border-gray-700 bg-gray-800 p-2 pr-10 text-white"
-            />
+          {/* Mesajlar */}
+          {success && (
+            <div className="p-4 border border-green-900/50 bg-green-900/10 text-green-400 text-xs text-center uppercase tracking-wide">
+              {success}
+            </div>
+          )}
+          {error && (
+            <div className="p-4 border border-red-900/50 bg-red-900/10 text-red-400 text-xs text-center uppercase tracking-wide">
+              {error}
+            </div>
+          )}
+
+          {/* Buton */}
+          <div>
             <button
-              type="button" 
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 flex items-center pr-3"
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-4 bg-white text-black font-bold uppercase tracking-[0.2em] hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-4"
             >
-              {showPassword ? (
-                <EyeSlashIcon className="h-5 w-5 text-gray-400" />
-              ) : (
-                <EyeIcon className="h-5 w-5 text-gray-400" />
-              )}
+              {isLoading ? 'Kaydediliyor...' : 'Kayıt Ol'}
             </button>
           </div>
-        </div>
 
-        {/* Başarı ve Hata Mesajları */}
-        {success && (
-          <div className="rounded-md bg-green-800 p-3 text-center text-green-100">
-            {success}
+          {/* Alt Link */}
+          <div className="text-center pt-6 border-t border-zinc-900">
+            <p className="text-zinc-600 text-xs">
+              Zaten hesabın var mı?
+              <Link href="/login" className="text-white hover:underline underline-offset-4 ml-2 uppercase tracking-widest text-[10px]">
+                Giriş Yap
+              </Link>
+            </p>
           </div>
-        )}
-        {error && (
-          <div className="rounded-md bg-red-800 p-3 text-center text-red-100">
-            {error}
-          </div>
-        )}
 
-        {/* Kayıt Ol Butonu */}
-        <div>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            {isLoading ? 'Kayıt Olunuyor...' : 'Kayıt Ol'}
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </main>
   );
 }

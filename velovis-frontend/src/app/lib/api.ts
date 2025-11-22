@@ -1,10 +1,12 @@
 import axios from 'axios';
 import { useAuthStore } from './store/auth.store'; // Auth Hafızamızı import et
 
+console.log("YÜKLENEN API URL:", process.env.NEXT_PUBLIC_API_URL);
+
 const API_BASE_URL = 'http://localhost:3000/api';
 
-const api = axios.create({
-  baseURL: API_BASE_URL,
+ const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -96,4 +98,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api;
+ export default api;
