@@ -91,7 +91,7 @@ export default function CartPage() {
           </h1>
           <div className="h-px w-full bg-zinc-800"></div>
           <div className="flex justify-between items-center mt-4 text-sm text-zinc-500 uppercase tracking-widest">
-            <span>Ürünleriniz rezerve edilmez</span>
+            
             <span>{items.length} Parça</span>
           </div>
         </div>
