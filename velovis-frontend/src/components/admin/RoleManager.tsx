@@ -17,7 +17,7 @@ export default function RoleManager() {
   const [newRoleName, setNewRoleName] = useState("");
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   
-  // 👇 YENİ: Hangi rollerin detayları açık? (ID listesi tutuyoruz)
+  // Hangi rollerin detayları açık? (ID listesi tutuyoruz)
   const [expandedRoles, setExpandedRoles] = useState<string[]>([]);
 
   const userPermissions = useAuthStore((state) => state.user?.permissions);
@@ -45,12 +45,12 @@ export default function RoleManager() {
   const handleCreateRole = (e: React.FormEvent) => { e.preventDefault(); if (!newRoleName.trim()) return; createRoleMutation.mutate(newRoleName); };
   const handleDeleteRole = (role: Role) => { if (window.confirm(`'${role.name}' rolünü silmek istediğinize emin misiniz?`)) { deleteRoleMutation.mutate(role.id); } };
 
-  // 👇 YENİ: Aç/Kapa Fonksiyonu
+  //Aç/Kapa Fonksiyonu
   const toggleExpand = (roleId: string) => {
     if (expandedRoles.includes(roleId)) {
-      setExpandedRoles(expandedRoles.filter(id => id !== roleId)); // Varsa çıkar (kapat)
+      setExpandedRoles(expandedRoles.filter(id => id !== roleId));
     } else {
-      setExpandedRoles([...expandedRoles, roleId]); // Yoksa ekle (aç)
+      setExpandedRoles([...expandedRoles, roleId]);
     }
   };
 
@@ -59,7 +59,7 @@ export default function RoleManager() {
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         
-        {/* KOLON 1: YENİ ROL OLUŞTUR */}
+        {/* YENİ ROL OLUŞTUR */}
         {canCreateRole && (
           <div className="md:col-span-1">
             <div className="border border-zinc-800 bg-zinc-900/20 p-6 h-full">
@@ -95,7 +95,7 @@ export default function RoleManager() {
           </div>
         )}
 
-        {/* KOLON 2 & 3: MEVCUT ROLLER */}
+        {/* MEVCUT ROLLER */}
         <div className="md:col-span-2">
           {isLoadingRoles && <p className="text-xs text-zinc-500 animate-pulse">Roller yükleniyor...</p>}
           {rolesError && <p className="text-xs text-red-500">Yetki yok veya hata oluştu.</p>}
@@ -145,7 +145,7 @@ export default function RoleManager() {
                         <span className="text-[10px] text-zinc-700 italic">Yetki yok</span>
                       )}
 
-                      {/* 👇 YENİ: AÇMA / KAPAMA BUTONLARI 👇 */}
+                      {/* AÇMA / KAPAMA BUTONLARI */}
                       {!isExpanded && hiddenCount > 0 && (
                         <button 
                           onClick={() => toggleExpand(role.id)}
@@ -173,7 +173,7 @@ export default function RoleManager() {
         </div>
       </div>
 
-      {/* MODAL (Aynı kaldı) */}
+      {/* MODAL */}
       {editingRole && (
         <EditRoleModal
           role={editingRole}
@@ -187,7 +187,7 @@ export default function RoleManager() {
 }
 
 // =================================================================
-// MODAL COMPONENT (AYNI KALDI)
+// MODAL COMPONENT
 // =================================================================
 function EditRoleModal({ role, allPermissions, isLoading, onClose }: { role: Role; allPermissions: string[]; isLoading: boolean; onClose: () => void; }) {
   const queryClient = useQueryClient();

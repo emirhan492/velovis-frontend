@@ -4,7 +4,7 @@ import { useAuthStore } from "../lib/store/auth.store"; // Göreceli yol
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-// Bu layout, /orders altındaki tüm sayfaları korur
+
 export default function OrdersLayout({
   children,
 }: {
@@ -13,14 +13,13 @@ export default function OrdersLayout({
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   
-  // 'localStorage' verisinin yüklenmesini beklemek (hydration)
-  // ve yönlendirmenin tamamlanmasını beklemek için state
+
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
     // 1. Giriş yapmış mı?
     if (!isAuthenticated) {
-      router.replace('/login'); // Giriş yapmamışsa, login'e at
+      router.replace('/login');
       return;
     }
     

@@ -78,7 +78,7 @@ export default function CartPage() {
   };
 
   // =================================================================
-  // ARAYÜZ (UI) KISMI - LÜKS TEMA GÜNCELLEMESİ
+  // ARAYÜZ (UI) KISMI
   // =================================================================
   return (
     <main className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black pt-24 pb-20">
@@ -157,7 +157,7 @@ export default function CartPage() {
                                 <Link href={`/products/${item.product.id}`} className="text-lg font-light hover:underline decoration-zinc-600 underline-offset-4 block">
                                   {item.product.name}
                                 </Link>
-                                {/* 👇 YENİ: BEDEN BİLGİSİ BURADA GÖSTERİLİYOR 👇 */}
+                                {/* BEDEN BİLGİSİ BURADA GÖSTERİLİYOR */}
                                 {item.size && (
                                   <span className="text-xs text-zinc-500 uppercase tracking-widest mt-2 block">
                                     Beden: <span className="text-white font-bold ml-1">{item.size}</span>

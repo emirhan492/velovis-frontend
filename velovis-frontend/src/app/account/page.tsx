@@ -7,7 +7,7 @@ import { useState } from "react";
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
 
 // =================================================================
-// ŞİFRE DEĞİŞTİRME FORMU (AYNEN KALDI)
+// ŞİFRE DEĞİŞTİRME FORMU
 // =================================================================
 function ChangePasswordForm() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -206,7 +206,6 @@ export default function AccountPage() {
                 </div>
 
                 {/* Roller - SADECE ADMIN GÖREBİLİR */}
-                {/* Değişiklik burada yapıldı: Sadece isAdmin true ise göster */}
                 {isAdmin && (
                   <div className="pt-4 border-t border-zinc-800/50">
                      <span className="block text-xs font-bold text-red-500 uppercase tracking-widest mb-2">

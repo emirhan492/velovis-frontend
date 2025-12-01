@@ -13,9 +13,8 @@ const API_BASE_URL = 'http://localhost:3000/api';
 });
 
 // =================================================================
-// 1. İSTEK (REQUEST) YAKALAYICI (Burası zaten vardı)
+// 1. İSTEK (REQUEST) YAKALAYICI
 // =================================================================
-// İstek gönderilmeden ÖNCE çalışır
 api.interceptors.request.use(
   (config) => {
     const { tokens } = useAuthStore.getState();
@@ -30,43 +29,30 @@ api.interceptors.request.use(
 );
 
 // =================================================================
-// 2. YANIT (RESPONSE) YAKALAYICI (YENİ EKLENEN KISIM)
+// 2. YANIT (RESPONSE) YAKALAYICI 
 // =================================================================
-// Sunucudan yanıt geldikten SONRA çalışır
+
 api.interceptors.response.use(
-  // 2a. Başarılı yanıtlar (2xx) için:
-  // Yanıtı olduğu gibi geri döndür
   (response) => {
     return response;
   },
   
-  // 2b. Hatalı yanıtlar (4xx, 5xx) için:
+
   async (error) => {
     const originalRequest = error.config;
-    
-    // --- BU, BİZİM TOKEN YENİLEME MANTIĞIMIZ ---
-    
-    // Eğer 401 (Unauthorized) hatası aldıysak VE
-    // bu istek ZATEN bir 'refresh' isteği DEĞİLSE
-    // (sonsuz döngüyü engellemek için)
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       
-      originalRequest._retry = true; // İsteği "denendi" olarak işaretle
-
+      originalRequest._retry = true;
       try {
-        // Hafızadan 'refreshToken' ve 'setTokens' eylemini al
         const { tokens, setTokens } = useAuthStore.getState();
         const currentRefreshToken = tokens?.refreshToken;
 
         if (!currentRefreshToken) {
-          // Hafızada 'refreshToken' yoksa, login'e yolla
-          // (veya useAuthStore.getState().logout() yap)
+
           return Promise.reject(error);
         }
 
-        // 1. YENİ TOKEN'LARI ALMAK İÇİN /auth/refresh ENDPOINT'İNİ ÇAĞIR
-        // ÖNEMLİ: Yeni bir axios instance'ı KULLANMADAN,
-        // temel 'axios' ile istek atıyoruz ki interceptor'a yakalanmasın.
         const { data: newTokens } = await axios.post(
           `${API_BASE_URL}/auth/refresh`,
           {
@@ -75,7 +61,7 @@ api.interceptors.response.use(
         );
 
         // 2. YENİ TOKEN'LARI GLOBAL HAFIZAYA (ZUSTAND) KAYDET
-        setTokens(newTokens); // (Bu, localStorage'ı da günceller)
+        setTokens(newTokens);
 
         // 3. BAŞARISIZ OLAN ESKİ İSTEĞİ (originalRequest) YENİ TOKEN İLE GÜNCELLE
         originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;

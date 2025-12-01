@@ -3,10 +3,11 @@ import  api  from '../api'; // Bizim "akıllı" (auth-aware) API istemcimiz
 import { useAuthStore } from './auth.store';
 
 export type CartItem = {
-  id: string; // Bu, CartItem'ın ID'si
+  id: string;
   quantity: number;
+  size: string | null;
   product: {
-    id: string; // Bu, Product'ın ID'si
+    id: string;
     name: string;
     price: number;
     primaryPhotoUrl: string | null;
@@ -21,20 +22,18 @@ type CartState = {
 
   // Eylemler
   fetchCart: () => Promise<void>;
-  addItem: (productId: string, quantity: number) => Promise<void>;
+  addItem: (productId: string, quantity: number, size: string) => Promise<void>;
   
-  // --- YENİ EKLENEN EYLEMLER ---
-  // Sepetten bir ürünü (kalemi) siler
+  // Sepetten bir ürünü siler
   removeItem: (cartItemId: string) => Promise<void>;
   // Sepetteki bir ürünün miktarını günceller
   updateItemQuantity: (cartItemId: string, newQuantity: number) => Promise<void>;
   // Sadece frontend'deki sepeti temizler (Çıkış yapınca kullanılır)
   clearClientCart: () => void;
-  // (Backend sepetini temizleme /api/cart-items DELETE, sipariş verince kullanılacak)
+
 };
 
 export const useCartStore = create<CartState>((set, get) => ({
-  // Başlangıç Değerleri
   items: [],
   isLoading: false,
   error: null,

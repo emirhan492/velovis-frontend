@@ -15,8 +15,8 @@ interface Comment {
   content: string;
   rating: number;
   createdAt: string;
-  updatedAt: string; // <-- Eklendi
-  editedByAdmin: boolean; // <-- Eklendi
+  updatedAt: string; 
+  editedByAdmin: boolean;
   userId: string;
   user: { firstName: string; lastName: string };
 }
@@ -104,7 +104,7 @@ export default function ProductDetailPage() {
     if (productId) fetchProduct();
   }, [productId]);
 
-  // --- YARDIMCI FONKSİYON: TARİH FORMATLAYICI ---
+  // --- TARİH FORMATLAYICI ---
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('tr-TR', {
       year: 'numeric',
@@ -115,7 +115,6 @@ export default function ProductDetailPage() {
     });
   };
 
-  // ... (Resim ve Sepet Fonksiyonları aynı kalsın) ...
   const changeImage = (newIndex: number) => {
     if (newIndex === currentIndex) return;
     setIsAnimating(true);
@@ -191,7 +190,7 @@ export default function ProductDetailPage() {
         
         {/* ÜRÜN DETAYI */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 mb-32">
-          {/* SOL: Galeri (Aynı) */}
+          {/* SOL: Galeri */}
           <div className="flex flex-col gap-6">
             <div className="relative w-full aspect-[3/4] bg-zinc-900 overflow-hidden group border border-zinc-800">
               <Image src={allPhotos[currentIndex]} alt={product.name} fill className={`object-cover transition-all duration-700 ease-in-out ${isAnimating ? 'opacity-0 scale-105 blur-sm' : 'opacity-100 scale-100 blur-0 group-hover:scale-110'}`} priority />
@@ -213,7 +212,7 @@ export default function ProductDetailPage() {
             )}
           </div>
 
-          {/* SAĞ: Bilgiler (Aynı) */}
+          {/* SAĞ: Bilgiler */}
           <div className="flex flex-col justify-center space-y-8">
             <div className="space-y-4 border-b border-zinc-800 pb-8">
               {product.category && <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">{product.category.name}</span>}
@@ -264,7 +263,7 @@ export default function ProductDetailPage() {
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
                 
-                {/* FORM (Aynı) */}
+                {/* FORM */}
                 <div className="border border-zinc-800 p-8 bg-zinc-950/50 h-fit sticky top-32">
                     <h3 className="text-sm font-bold uppercase tracking-widest text-white mb-6">Bir Yorum Yaz</h3>
                     {isAuthenticated ? (
@@ -295,7 +294,7 @@ export default function ProductDetailPage() {
                     )}
                 </div>
 
-                {/* YORUM LİSTESİ (GÜNCELLENDİ) */}
+                {/* YORUM LİSTESİ */}
                 <div className="space-y-8">
                     {(!product.comments || product.comments.length === 0) ? (
                         <div className="text-center py-12 border border-zinc-800 border-dashed">
@@ -307,7 +306,6 @@ export default function ProductDetailPage() {
                             const canEdit = isOwner || isAdmin;
                             const isEditing = editingCommentId === comment.id;
                             
-                            // Düzenlenme Kontrolü
                             const isEdited = comment.createdAt !== comment.updatedAt;
 
                             return (
@@ -319,7 +317,7 @@ export default function ProductDetailPage() {
                                             <span className="text-white font-medium text-sm block mb-1">
                                                 {comment.user.firstName} {comment.user.lastName.charAt(0)}.
                                             </span>
-                                            {/* 👇 TARİH GÖSTERİMİ (SAAT EKLENDİ) */}
+                                            {/* TARİH GÖSTERİMİ*/}
                                             <span className="text-zinc-600 text-[10px] font-mono uppercase tracking-wide">
                                                 {formatDate(comment.createdAt)}
                                             </span>
@@ -365,7 +363,7 @@ export default function ProductDetailPage() {
                                               {comment.content}
                                           </p>
                                           
-                                          {/* 👇 DÜZENLENDİ BİLGİSİ */}
+                                          {/* DÜZENLENDİ BİLGİSİ */}
                                           {isEdited && (
                                             <div className="mt-3 text-[10px] text-zinc-600 italic flex items-center gap-1">
                                                <PencilSquareIcon className="w-3 h-3" />

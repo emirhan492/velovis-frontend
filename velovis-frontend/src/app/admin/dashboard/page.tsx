@@ -119,9 +119,6 @@ export default function AdminDashboardPage() {
               <span className="text-[10px] text-zinc-600 uppercase">Sistem Yetkileri</span>
             </div>
             <div className="p-6">
-               {/* RoleManager bileşeni içinde kendi stilleri varsa, 
-                   onları da bu temaya uygun hale getirmek gerekebilir. 
-                   Şimdilik container'ı lüks hale getirdik. */}
                <RoleManager />
             </div>
           </div>

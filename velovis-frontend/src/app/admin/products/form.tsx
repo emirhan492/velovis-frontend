@@ -30,7 +30,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
     categoryId: "",
   });
 
-  // 👇 YENİ: Ekstra Fotoğraflar State'i
+  // Ekstra Fotoğraflar State'i
   const [otherPhotos, setOtherPhotos] = useState<string[]>([]);
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 👇 FOTOĞRAF EKLEME/ÇIKARMA FONKSİYONLARI
+  // FOTOĞRAF EKLEME/ÇIKARMA FONKSİYONLARI
   const addPhotoField = () => {
     setOtherPhotos([...otherPhotos, ""]); // Boş bir input ekle
   };
@@ -92,7 +92,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
       price: parseFloat(formData.price),
       stockQuantity: parseInt(formData.stockQuantity),
       slug: slugify(formData.name),
-      otherPhotos: cleanedPhotos, // 👇 Backend'e gönderiyoruz
+      otherPhotos: cleanedPhotos, // Backend'e gönderiyoruz
     };
 
     try {
@@ -121,7 +121,6 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
     <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-8">
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* ... (DİĞER ALANLAR AYNI) ... */}
         <div className="md:col-span-2">
           <label className={labelClass}>Ürün Adı</label>
           <input name="name" value={formData.name} onChange={handleChange} required className={inputClass} placeholder="Örn: Vintage Deri Ceket" />
@@ -153,7 +152,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
           <input name="primaryPhotoUrl" value={formData.primaryPhotoUrl} onChange={handleChange} required className={inputClass} placeholder="/pics/kapak.jpg" />
         </div>
 
-        {/* 👇 YENİ: EKSTRA FOTOĞRAFLAR BÖLÜMÜ 👇 */}
+        {/* EKSTRA FOTOĞRAFLAR BÖLÜMÜ */}
         <div className="md:col-span-2 border-t border-zinc-800 pt-6">
           <div className="flex justify-between items-center mb-4">
             <label className={labelClass}>Diğer Fotoğraflar (Galeri)</label>
@@ -191,7 +190,6 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
             ))}
           </div>
         </div>
-        {/* 👆 -------------------------------- 👆 */}
 
         <div className="md:col-span-2">
           <label className={labelClass}>Kısa Açıklama</label>

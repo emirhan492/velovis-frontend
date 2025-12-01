@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import api from 'src/app/lib/api';
@@ -15,6 +15,9 @@ interface Product {
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const [activeProductId, setActiveProductId] = useState<string | null>(null);
+  const observerRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -31,12 +34,38 @@ export default function ProductsPage() {
     fetchProducts();
   }, []);
 
-  // 👇 YARDIMCI FONKSİYON: URL DÜZELTİCİ
+  // MOBİL SCROLL TAKİBİ
+  useEffect(() => {
+    if (loading || products.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('data-id');
+            if (id) setActiveProductId(id);
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '-40% 0px -40% 0px', 
+        threshold: 0 
+      }
+    );
+
+    observerRefs.current.forEach((node) => {
+      if (node) observer.observe(node);
+    });
+
+    return () => observer.disconnect();
+  }, [loading, products]);
+
   const getValidImageUrl = (url: string | null) => {
-    if (!url) return "https://picsum.photos/800/1000?grayscale"; // Resim yoksa
-    if (url.startsWith("http")) return url; // Dış linkse (Unsplash vb.) dokunma
-    if (url.startsWith("/")) return url; // Zaten başında / varsa dokunma
-    return `/${url}`; // Başında / yoksa ekle (Hata buradaydı!)
+    if (!url) return "https://picsum.photos/800/1000?grayscale";
+    if (url.startsWith("http")) return url;
+    if (url.startsWith("/")) return url;
+    return `/${url}`;
   };
 
   if (loading) {
@@ -69,16 +98,31 @@ export default function ProductsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
             {products.map((product) => (
-              <Link href={`/products/${product.id}`} key={product.id} className="group cursor-pointer block">
+              <Link 
+                href={`/products/${product.id}`} 
+                key={product.id} 
+                className="group cursor-pointer block"
+                ref={(el) => {
+                  if (el) observerRefs.current.set(product.id, el);
+                  else observerRefs.current.delete(product.id);
+                }}
+                data-id={product.id} 
+              >
                 
                 {/* Resim Alanı */}
                 <div className="relative aspect-[3/4] overflow-hidden bg-zinc-900 mb-6">
                   <Image
-                    // 👇 BURADA DÜZELTME FONKSİYONUNU KULLANDIK
                     src={getValidImageUrl(product.primaryPhotoUrl)}
                     alt={product.name}
                     fill
-                    className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
+
+                    className={`object-cover transition-all duration-700 ease-out
+                      ${activeProductId === product.id ? 'grayscale-0 scale-105' : 'grayscale scale-100'} 
+                      
+                      md:scale-100 md:grayscale 
+                      md:group-hover:grayscale-0 md:group-hover:scale-105
+                    `}
+
                   />
                   
                   <div className="absolute bottom-0 left-0 w-full bg-white text-black py-3 text-center translate-y-full group-hover:translate-y-0 transition-transform duration-300 font-medium uppercase text-xs tracking-widest">
@@ -100,7 +144,6 @@ export default function ProductsPage() {
           </div>
         )}
       </div>
-
     </div>
   );
 }

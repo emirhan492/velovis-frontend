@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className={`${inter.className} bg-black text-white antialiased`}>
         <Providers>
           
-          {/* 👇 ÖNEMLİ: Tüm sayfayı kapsayan esnek kutu */}
+          {/* Tüm sayfayı kapsayan kutu */}
           <div className="flex flex-col min-h-screen">
             
             {/* Header En Üstte */}

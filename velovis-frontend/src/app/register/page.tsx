@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link"; // Link componentini ekledik (Giriş sayfasına yönlendirme için)
+import Link from "next/link";
 import api from "../lib/api";
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
 
@@ -81,7 +81,7 @@ export default function RegisterPage() {
       
         <form onSubmit={handleSubmit} className="mt-12 space-y-6">
           
-          {/* İsim & Soyisim (Yan Yana) */}
+          {/* İsim & Soyisim */}
           <div className="flex space-x-4">
             <div className="flex-1">
               <label htmlFor="firstName" className={labelClassName}>İsim</label>
@@ -153,7 +153,7 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 required
                 minLength={8}
-                className={`${inputClassName} pr-12`} // Göz ikonu için sağdan boşluk
+                className={`${inputClassName} pr-12`}
                 placeholder="••••••••"
               />
               <button

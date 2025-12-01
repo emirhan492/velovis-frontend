@@ -1,4 +1,4 @@
-// src/app/payment/success/page.tsx
+
 
 import Link from "next/link";
 
@@ -18,9 +18,9 @@ export default function PaymentSuccessPage() {
             viewBox="0 0 24 24"
           >
             <path
-              strokeLinecap="square" // Yuvarlak yerine keskin hat
+              strokeLinecap="square"
               strokeLinejoin="miter"
-              strokeWidth="1.5"      // Daha ince çizgi
+              strokeWidth="1.5"  
               d="M5 13l4 4L19 7"
             ></path>
           </svg>

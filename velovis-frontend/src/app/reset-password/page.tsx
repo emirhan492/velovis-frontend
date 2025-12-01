@@ -1,13 +1,13 @@
 "use client"; // Bu, interaktif bir sayfadır (hook'lar kullanır)
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation"; // 1. URL'den token'ı okumak için
-import api from "../lib/api"; // Göreceli yolla API istemcimiz
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid'; // Göz ikonları
+import { useRouter, useSearchParams } from "next/navigation";
+import api from "../lib/api";
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const searchParams = useSearchParams(); // URL ?token=... kısmını okumak için
+  const searchParams = useSearchParams(); 
 
   // Form state'leri
   const [token, setToken] = useState<string | null>(null);
@@ -20,13 +20,11 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 1. ADIM: Sayfa yüklendiğinde URL'den token'ı oku
   useEffect(() => {
     const tokenFromUrl = searchParams.get('token');
     if (tokenFromUrl) {
       setToken(tokenFromUrl);
     } else {
-      // Token yoksa, bu sayfada işi yok, ana sayfaya yolla
       setError("Geçersiz sıfırlama linki. Lütfen tekrar deneyin.");
       setTimeout(() => router.push('/forgot-password'), 2000);
     }
@@ -55,13 +53,13 @@ export default function ResetPasswordPage() {
     setIsLoading(true);
 
     try {
-      // 3. ADIM: Backend'e isteği yolla
+      //Backend'e isteği yolla
       const { data } = await api.post('/auth/reset-password', {
         token: token,
         newPassword: newPassword,
       });
 
-      // 4. ADIM: Başarılı olduysa
+      // Başarılı olduysa
       setSuccess(data.message || "Şifreniz başarıyla sıfırlandı! Giriş sayfasına yönlendiriliyorsunuz...");
       
       // 2 saniye bekle ve kullanıcıyı giriş sayfasına yönlendir
@@ -70,7 +68,7 @@ export default function ResetPasswordPage() {
       }, 2000);
 
     } catch (err: any) {
-      // 5. ADIM: Hata oluşursa (örn: 403 Token geçersiz/süresi dolmuş)
+      // Hata oluşursa (örn: 403 Token geçersiz/süresi dolmuş)
       console.error(err);
       const message = err.response?.data?.message || "Bir hata oluştu.";
       setError(message);
@@ -155,7 +153,7 @@ export default function ResetPasswordPage() {
         <div>
           <button
             type="submit"
-            disabled={isLoading || !!success} // Başarılıysa butonu kilitle
+            disabled={isLoading || !!success}
             className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {isLoading ? 'Güncelleniyor...' : 'Şifreyi Güncelle'}

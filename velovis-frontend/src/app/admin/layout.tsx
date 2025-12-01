@@ -1,6 +1,6 @@
 "use client"; // Bu koruma, tarayıcıda (client-side) çalışmak zorunda
 
-import { useAuthStore } from "../lib/store/auth.store"; // Göreceli yol
+import { useAuthStore } from "../lib/store/auth.store";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -19,7 +19,7 @@ export default function AdminLayout({
   useEffect(() => {
     // 1. Giriş yapmış mı?
     if (!isAuthenticated) {
-      router.replace('/login'); // Giriş yapmamışsa, login'e at
+      router.replace('/login');
       return;
     }
 
@@ -27,7 +27,7 @@ export default function AdminLayout({
     const hasPermission = user?.permissions.includes(REQUIRED_PERMISSION);
 
     if (!hasPermission) {
-      router.replace('/'); // Yetkisi yoksa, ana sayfaya at
+      router.replace('/');
       return;
     }
     

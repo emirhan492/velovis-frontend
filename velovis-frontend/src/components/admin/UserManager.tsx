@@ -7,7 +7,7 @@ import { useAuthStore } from "src/app/lib/store/auth.store";
 import { PERMISSIONS } from "src/app/lib/constants"; 
 import { PencilSquareIcon, TrashIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
-// Tip Tanımları (Aynı)
+// Tip Tanımları
 type Role = { id: string; name: string; };
 type User = { id: string; fullName: string; email: string; roles: { role: Role }[]; };
 
@@ -17,9 +17,9 @@ const fetchRoles = async (): Promise<Role[]> => { const { data } = await api.get
 export default function UserManager() {
   const queryClient = useQueryClient();
   
-  // Düzenleme State'leri (Basitleştirilmiş, Modal yerine inline düzenleme)
+  // Düzenleme State'leri 
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]); // ID listesi
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]); 
 
   const currentUserId = useAuthStore((state) => state.user?.id);
   const userPermissions = useAuthStore((state) => state.user?.permissions); 
@@ -49,7 +49,6 @@ export default function UserManager() {
   // Düzenlemeyi Başlat
   const handleStartEdit = (user: User) => {
     setEditingUserId(user.id);
-    // Kullanıcının mevcut rollerinin ID'lerini al
     setSelectedRoles(user.roles.map(r => r.role.id));
   };
 
@@ -65,7 +64,6 @@ export default function UserManager() {
   // Kaydet (Mutation)
   const updateRolesMutation = useMutation({
     mutationFn: async ({ userId, roleIds }: { userId: string, roleIds: string[] }) => {
-       // Backend endpointine göre burası değişebilir. Genelde array gönderilir.
        return api.patch(`/users/${userId}/roles`, { roles: roleIds }); 
     },
     onSuccess: () => {
@@ -95,7 +93,7 @@ export default function UserManager() {
 
   return (
     <div className="w-full overflow-hidden">
-      <table className="w-full text-left table-fixed"> {/* table-fixed: Sütun genişliklerini sabitler */}
+      <table className="w-full text-left table-fixed">
         
         <thead>
           <tr className="border-b border-zinc-800 text-[10px] text-zinc-500 uppercase tracking-widest">
@@ -131,7 +129,7 @@ export default function UserManager() {
                       <label key={role.id} className="flex items-center gap-1 cursor-pointer select-none hover:bg-zinc-800 px-1 rounded transition-colors">
                         <input 
                           type="checkbox" 
-                          checked={selectedRoles.includes(role.id)} // ID ile kontrol
+                          checked={selectedRoles.includes(role.id)}
                           onChange={() => toggleRole(role.id)}
                           className="accent-white w-3 h-3"
                         />

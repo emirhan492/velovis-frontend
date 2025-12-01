@@ -2,17 +2,16 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 // =================================================================
-// TİP TANIMLAMALARI (Düzeltildi)
+// TİP TANIMLAMALARI
 // =================================================================
 
-// Hem API'dan gelen, hem de saklanan tip artık AYNI: string[]
 type User = {
   id: string;
   username: string;
   fullName: string;
   email: string;
   roles: string[];
-  permissions: string[]; // <-- 'Set' değil, 'string[]' (Array)
+  permissions: string[];
 };
 
 type Tokens = {
@@ -39,18 +38,13 @@ export const useAuthStore = create<AuthState>()(
       tokens: null,
       isAuthenticated: false,
       
-      // --- HATA ÇÖZÜMÜ BURADA ---
-      // Artık 'Set'e dönüştürme YOK.
-      // API'dan 'User' (içinde 'string[]' var) alıyoruz,
-      // ve onu olduğu gibi 'set' ediyoruz.
       login: (tokens, user) => {
         set({
           tokens: tokens,
-          user: user, // Veriyi 'Set'e dönüştürmeden, olduğu gibi (Array olarak) kaydet
+          user: user,
           isAuthenticated: true,
         });
       },
-      // --- ÇÖZÜM BİTTİ ---
 
       logout: () => {
         set({

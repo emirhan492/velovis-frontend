@@ -44,7 +44,7 @@ export default function AdminProductsPage() {
     }
   };
 
-  // 👇 YARDIMCI FONKSİYON: URL DÜZELTİCİ (HATA ÇÖZÜMÜ BURADA)
+  // URL DÜZELTİCİ
   const getValidImageUrl = (url: string | null) => {
     if (!url) return "https://via.placeholder.com/150"; // Resim yoksa placeholder
     if (url.startsWith("http")) return url; // Dış linkse (Unsplash vb.) dokunma
@@ -88,7 +88,6 @@ export default function AdminProductsPage() {
                   <td className="p-4">
                     <div className="w-12 h-16 relative bg-zinc-800 overflow-hidden">
                       <Image
-                        // 👇 BURADA DÜZELTİCİ FONKSİYONU KULLANDIK
                         src={getValidImageUrl(product.primaryPhotoUrl)}
                         alt={product.name}
                         fill

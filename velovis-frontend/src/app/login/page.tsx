@@ -1,4 +1,4 @@
-// Dosya: src/app/login/page.tsx
+
 
 "use client";
 
@@ -39,7 +39,6 @@ function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Aktivasyon linkinden gelindiyse mesaj göster
   useEffect(() => {
     const activated = searchParams.get('activated');
     const errorParam = searchParams.get('error');

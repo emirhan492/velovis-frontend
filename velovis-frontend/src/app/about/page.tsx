@@ -12,10 +12,9 @@ export default function AboutPage() {
       <section className="py-24 md:py-32 container mx-auto px-6">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           
-          {/* Sol: Görsel (Picsum ile değiştirildi - Grayscale sayesinde siyah beyaz görünecek) */}
+          {/* Sol: Görsel */}
           <div className="relative h-[600px] w-full overflow-hidden grayscale hover:grayscale-0 duration-500 ">
             <Image
-              // Unsplash yerine Picsum kullanıyoruz
               src="/pics/25642805-3c7d-46a2-ac8c-b5907bcfbfee (1).jpeg" 
               alt="Ceket Detayı"
               fill
@@ -38,7 +37,7 @@ export default function AboutPage() {
              
              <div className="pt-6">
   <a
-    href="https://www.instagram.com/e_ustax" // <-- BURAYA KENDİ KULLANICI ADINI YAZ
+    href="https://www.instagram.com/e_ustax"
     target="_blank"
     rel="noopener noreferrer"
     className="inline-flex items-center gap-3 text-white hover:text-zinc-500 transition-colors duration-300 group"
@@ -76,7 +75,6 @@ export default function AboutPage() {
       {/* 3. ESTETİK VİTRİN */}
       <section className="w-full h-[500px] relative grayscale">
         <Image
-           // Unsplash yerine Picsum kullanıyoruz
           src="/pics/IMG_9801-scaled.jpeg"
           alt="Velovis Atölye"
           fill
@@ -88,7 +86,7 @@ export default function AboutPage() {
           </p>
         </div>
       </section>
-      {/* --- YENİ EKLENEN: İLETİŞİM BÖLÜMÜ --- */}
+      {/* İLETİŞİM BÖLÜMÜ */}
       <section className="py-24 border-b border-zinc-900">
         <div className="container mx-auto px-6 text-center">
           
@@ -97,7 +95,7 @@ export default function AboutPage() {
             İletişim
           </h2>
 
-          {/* Linkler (Yan yana duracak) */}
+          {/* Linkler */}
           <div className="flex flex-col md:flex-row justify-center items-center gap-16 md:gap-32">
             
             {/* 1. Instagram */}
