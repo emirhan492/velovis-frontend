@@ -27,7 +27,7 @@ type CartState = {
   // Sepetten bir ürünü siler
   removeItem: (cartItemId: string) => Promise<void>;
   // Sepetteki bir ürünün miktarını günceller
-  updateItemQuantity: (cartItemId: string, newQuantity: number) => Promise<void>;
+  updateQuantity: (cartItemId: string, newQuantity: number) => Promise<void>;
   // Sadece frontend'deki sepeti temizler (Çıkış yapınca kullanılır)
   clearClientCart: () => void;
 
@@ -107,9 +107,9 @@ export const useCartStore = create<CartState>((set, get) => ({
   },
 
   // =================================================================
-  // MİKTAR GÜNCELLE (updateItemQuantity) - YENİ
+  // MİKTAR GÜNCELLE
   // =================================================================
-  updateItemQuantity: async (cartItemId: string, newQuantity: number) => {
+  updateQuantity: async (cartItemId: string, newQuantity: number) => {
     set({ isLoading: true, error: null });
     try {
       // Backend'e PATCH isteği at
