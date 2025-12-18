@@ -10,7 +10,7 @@ import { useCartStore } from 'src/app/lib/store/cart.store';
 export default function CartPage() {
   const router = useRouter();
   
-  const { items, removeItem, updateQuantity, fetchCart } = useCartStore();
+  const { items, removeItem, updateItemQuantity, fetchCart } = useCartStore();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export default function CartPage() {
                   <div className="flex justify-between items-end mt-4">
                     <div className="flex items-center border border-zinc-800">
                       <button 
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
                         className="p-2 hover:bg-zinc-900 transition-colors disabled:opacity-30"
                         disabled={item.quantity <= 1}
                       >
@@ -101,7 +101,7 @@ export default function CartPage() {
                       </button>
                       <span className="w-8 text-center text-xs font-mono">{item.quantity}</span>
                       <button 
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
                         className="p-2 hover:bg-zinc-900 transition-colors"
                       >
                         <PlusIcon className="w-3 h-3 text-zinc-400" />
