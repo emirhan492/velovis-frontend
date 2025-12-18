@@ -33,7 +33,7 @@ export default function PaymentSuccessPage() {
         <div className="h-px w-16 bg-green-500 mx-auto mb-6"></div>
 
         <p className="text-zinc-400 mb-12 text-sm font-light leading-relaxed">
-          Ödemeniz başarıyla alındı. Sipariş detaylarınızı e-posta adresinize gönderdik.
+          Ödemeniz başarıyla alındı.
         </p>
 
         <div className="space-y-4">
