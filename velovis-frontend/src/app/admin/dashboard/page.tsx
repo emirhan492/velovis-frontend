@@ -8,26 +8,39 @@ import UserManager from '../../../components/admin/UserManager';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState({
-    totalOrders: 0,
-    totalRevenue: 0,
-    pendingOrders: 0,
-    shippedOrders: 0,
+    dailyOrders: 0,   
+    dailyRevenue: 0,  
+    pendingOrders: 0, 
+    shippedOrders: 0, 
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Backend'den tüm siparişleri çekip istatistik hesaplıyoruz
         const { data } = await api.get('/orders/admin/all');
         
-        const totalRevenue = data.reduce((sum: number, order: any) => sum + Number(order.totalPrice), 0);
+        // ---  BUGÜNÜN BAŞLANGIÇ ZAMANINI BELİRLE ---
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // --- SİPARİŞLERİ FİLTRELE ---
+        const todaysOrders = data.filter((order: any) => {
+          const orderDate = new Date(order.createdAt);
+          return orderDate >= today;
+        });
+
+        // --- GÜNLÜK İSTATİSTİKLERİ HESAPLA ---
+        const dailyRevenue = todaysOrders.reduce((sum: number, order: any) => sum + Number(order.totalPrice), 0);
+        const dailyOrders = todaysOrders.length;
+
+        // --- GENEL DURUM ---
         const pendingOrders = data.filter((order: any) => order.status === 'PAID' || order.status === 'PENDING').length;
         const shippedOrders = data.filter((order: any) => order.status === 'SHIPPED').length;
 
         setStats({
-          totalOrders: data.length,
-          totalRevenue,
+          dailyOrders,
+          dailyRevenue,
           pendingOrders,
           shippedOrders,
         });
@@ -66,27 +79,23 @@ export default function AdminDashboardPage() {
         {/* --- BÖLÜM 1: İSTATİSTİKLER --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           
-          {/* Toplam Ciro */}
           <div className="border border-zinc-800 bg-zinc-950 p-6 group hover:border-zinc-600 transition-colors">
-            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Toplam Ciro</h3>
+            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Günlük Ciro</h3>
             <p className="text-2xl font-mono text-green-500">
-              {stats.totalRevenue.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
+              {stats.dailyRevenue.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
             </p>
           </div>
 
-          {/* Toplam Sipariş */}
           <div className="border border-zinc-800 bg-zinc-950 p-6 group hover:border-zinc-600 transition-colors">
-            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Toplam Sipariş</h3>
-            <p className="text-2xl font-mono text-white">{stats.totalOrders}</p>
+            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Günlük Sipariş</h3>
+            <p className="text-2xl font-mono text-white">{stats.dailyOrders}</p>
           </div>
 
-          {/* Bekleyen Siparişler */}
           <div className="border border-zinc-800 bg-zinc-950 p-6 group hover:border-zinc-600 transition-colors">
             <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Kargolanacak</h3>
             <p className="text-2xl font-mono text-yellow-500">{stats.pendingOrders}</p>
           </div>
 
-          {/* Kargodaki Siparişler */}
           <div className="border border-zinc-800 bg-zinc-950 p-6 group hover:border-zinc-600 transition-colors">
             <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Kargoda</h3>
             <p className="text-2xl font-mono text-blue-500">{stats.shippedOrders}</p>
@@ -112,7 +121,6 @@ export default function AdminDashboardPage() {
         {/* --- BÖLÜM 3: YÖNETİM ARAÇLARI --- */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           
-          {/* Rol Yönetimi */}
           <div className="border border-zinc-800 bg-zinc-950">
             <div className="px-6 py-4 border-b border-zinc-800 bg-zinc-900/20 flex justify-between items-center">
               <h2 className="text-sm font-bold text-white uppercase tracking-widest">Rol Yönetimi</h2>
@@ -123,7 +131,6 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* Kullanıcı Yönetimi */}
           <div className="border border-zinc-800 bg-zinc-950">
             <div className="px-6 py-4 border-b border-zinc-800 bg-zinc-900/20 flex justify-between items-center">
               <h2 className="text-sm font-bold text-white uppercase tracking-widest">Kullanıcı Yönetimi</h2>

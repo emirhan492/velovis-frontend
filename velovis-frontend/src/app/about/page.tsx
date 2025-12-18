@@ -1,23 +1,62 @@
-import React from 'react';
+"use client";
+
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export default function AboutPage() {
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Ekrana %60'ı girince mobilde renklenmesi için
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        } else {
+          setIsVisible(false);
+        }
+      },
+      { threshold: 0.6 } 
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (containerRef.current) {
+        observer.unobserve(containerRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
       
-     
-
       {/* 2. MANİFESTO */}
       <section className="py-24 md:py-32 container mx-auto px-6">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           
           {/* Sol: Görsel */}
-          <div className="relative h-[600px] w-full overflow-hidden grayscale hover:grayscale-0 duration-500 ">
+          {/* ÇÖZÜM MANTIĞI:
+              1. Mobilde: `isVisible` true ise 'grayscale-0', değilse 'grayscale'.
+              2. Masaüstünde (md:): `md:grayscale` diyerek JS'nin verdiği 'grayscale-0'ı eziyoruz ve siyah-beyazı zorluyoruz.
+              3. Masaüstü Hover (md:hover:): `md:hover:grayscale-0` diyerek sadece mouse gelince renkli yapıyoruz.
+          */}
+          <div 
+            ref={containerRef}
+            className={`relative h-[600px] w-full overflow-hidden transition-all duration-1000 ease-in-out 
+              ${isVisible ? 'grayscale-0' : 'grayscale'} 
+              md:grayscale md:hover:grayscale-0
+            `}
+          >
             <Image
               src="/pics/25642805-3c7d-46a2-ac8c-b5907bcfbfee (1).jpeg" 
               alt="Ceket Detayı"
               fill
+              // Zoom efekti hem mobilde hem masaüstünde çalışır
               className="object-cover hover:scale-105 transition-transform duration-1000 ease-out"
             />
           </div>
@@ -32,41 +71,35 @@ export default function AboutPage() {
               Velovis Wear olarak yolculuğumuza 2021 yılında, sıradanlığa meydan okuyan tasarımlar üretme tutkusuyla başladık. Amerikan Kolej Montlarının zamansız ruhunu, modern çizgiler ve özel konseptlerle yeniden yorumluyoruz. Kısa sürede kazandığımız ilginiz, bize doğru yolda olduğumuzu gösteriyor. Ancak bu daha başlangıç; kuralları yeniden yazacak tasarımlarla tarzınıza eşlik etmeye devam edeceğiz.
             </p>
             
-            
             <div className="pt-4 grid grid-cols-2 gap-8 border-t border-zinc-900 mt-8">
-             
-             <div className="pt-6">
-  <a
-    href="https://www.instagram.com/e_ustax"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="inline-flex items-center gap-3 text-white hover:text-zinc-500 transition-colors duration-300 group"
-  >
-    {/* Instagram SVG İkonu */}
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="group-hover:scale-110 transition-transform duration-300"
-    >
-      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-    </svg>
-
-    {/* Yazı */}
-    <span className="text-sm uppercase tracking-widest font-medium">
-      Instagram
-    </span>
-  </a>
-</div>
-             
+              <div className="pt-6">
+                <a
+                  href="https://www.instagram.com/e_ustax"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 text-white hover:text-zinc-500 transition-colors duration-300 group"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="group-hover:scale-110 transition-transform duration-300"
+                  >
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                  </svg>
+                  <span className="text-sm uppercase tracking-widest font-medium">
+                    Instagram
+                  </span>
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -86,16 +119,13 @@ export default function AboutPage() {
           </p>
         </div>
       </section>
+
       {/* İLETİŞİM BÖLÜMÜ */}
       <section className="py-24 border-b border-zinc-900">
         <div className="container mx-auto px-6 text-center">
-          
-          {/* Başlık */}
           <h2 className="text-2xl md:text-3xl font-light uppercase tracking-[0.3em] mb-16 text-white">
             İletişim
           </h2>
-
-          {/* Linkler */}
           <div className="flex flex-col md:flex-row justify-center items-center gap-16 md:gap-32">
             
             {/* 1. Instagram */}
@@ -105,7 +135,6 @@ export default function AboutPage() {
               rel="noopener noreferrer"
               className="group flex flex-col items-center gap-6"
             >
-              {/* İkon Kutusu */}
               <div className="w-16 h-16 flex items-center justify-center border border-zinc-800 rounded-full group-hover:border-white group-hover:scale-110 transition-all duration-500">
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
@@ -114,7 +143,7 @@ export default function AboutPage() {
                   viewBox="0 0 24 24" 
                   fill="none" 
                   stroke="currentColor" 
-                  strokeWidth="1.5" // İnce çizgi
+                  strokeWidth="1.5" 
                   strokeLinecap="round" 
                   strokeLinejoin="round" 
                   className="text-zinc-400 group-hover:text-white transition-colors"
@@ -124,7 +153,6 @@ export default function AboutPage() {
                   <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                 </svg>
               </div>
-              {/* Yazı */}
               <div className="space-y-1">
                 <span className="block text-xs font-bold text-zinc-500 uppercase tracking-widest group-hover:text-white transition-colors">
                   Instagram
@@ -140,7 +168,6 @@ export default function AboutPage() {
               href="" 
               className="group flex flex-col items-center gap-6"
             >
-              {/* İkon Kutusu */}
               <div className="w-16 h-16 flex items-center justify-center border border-zinc-800 rounded-full group-hover:border-white group-hover:scale-110 transition-all duration-500">
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
@@ -158,7 +185,6 @@ export default function AboutPage() {
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
               </div>
-              {/* Yazı */}
               <div className="space-y-1">
                 <span className="block text-xs font-bold text-zinc-500 uppercase tracking-widest group-hover:text-white transition-colors">
                   E-Posta
@@ -173,7 +199,6 @@ export default function AboutPage() {
         </div>
       </section>
       
-
       {/* 5. FOOTER CTA */}
       <section className="py-24 border-t border-zinc-900 flex flex-col items-center text-center px-4">
         <h2 className="text-4xl md:text-6xl font-light mb-8 tracking-tight">

@@ -10,6 +10,13 @@ interface AdminOrder {
   status: string;
   createdAt: string;
   user: { fullName: string; email: string };
+  // Adres Alanları
+  contactName: string | null;
+  city: string | null;
+  district: string | null;
+  phone: string | null;
+  address: string | null;
+  
   items: {
     id: string;
     quantity: number;
@@ -26,8 +33,8 @@ export default function AdminOrdersPage() {
       const { data } = await api.get('/orders/admin/all');
       setOrders(data);
     } catch (error) {
-      console.error('Admin siparişleri çekemedi:', error);
-      alert('Yetkiniz yok veya hata oluştu.');
+      console.error('Hata:', error);
+      alert('Siparişler yüklenirken hata oluştu.');
     } finally {
       setLoading(false);
     }
@@ -46,21 +53,18 @@ export default function AdminOrdersPage() {
     }
   };
 
-  // Para İadesi
+  // İade İşlemi
   const handleRefund = async (orderId: string) => {
-    if (!confirm('UYARI: Bu işlem Iyzico üzerinden karta para iadesi yapacaktır. Onaylıyor musunuz?')) return;
-    
+    if (!confirm('UYARI: Para iadesi başlatılacak. Onaylıyor musunuz?')) return;
     try {
       await api.post(`/orders/${orderId}/refund`);
-      alert('Para iadesi işlemi başlatıldı.');
+      alert('İade işlemi başlatıldı.');
       fetchOrders();
     } catch (error: any) {
-      console.error(error);
-      alert('İade işlemi sırasında hata oluştu: ' + (error.response?.data?.message || 'Bilinmeyen hata'));
+      alert('Hata: ' + (error.response?.data?.message || 'Bilinmeyen hata'));
     }
   };
 
-  // Yardımcı Fonksiyon: Resim URL Düzeltici
   const getValidImageUrl = (url: string | null) => {
     if (!url) return "https://via.placeholder.com/150";
     if (url.startsWith("http")) return url;
@@ -68,7 +72,6 @@ export default function AdminOrdersPage() {
     return `/${url}`;
   };
 
-  // Yardımcı Fonksiyon: Durum Stilleri
   const getStatusStyle = (status: string) => {
     switch (status) {
       case 'PAID': return 'text-green-500 border-green-500/50 bg-green-500/10';
@@ -102,8 +105,9 @@ export default function AdminOrdersPage() {
           <table className="w-full text-left text-sm text-zinc-400">
             <thead className="bg-zinc-900 text-xs uppercase tracking-widest text-zinc-500">
               <tr>
-                <th className="p-4 font-medium w-1/3">Ürünler</th>
-                <th className="p-4 font-medium">Müşteri</th>
+                <th className="p-4 font-medium w-1/4">Ürünler</th>
+                <th className="p-4 font-medium">Alıcı / İletişim</th>
+                <th className="p-4 font-medium w-1/4">Teslimat Adresi</th>
                 <th className="p-4 font-medium">Tarih</th>
                 <th className="p-4 font-medium">Tutar</th>
                 <th className="p-4 font-medium">Durum</th>
@@ -112,7 +116,7 @@ export default function AdminOrdersPage() {
             </thead>
             <tbody className="divide-y divide-zinc-800">
               {orders.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-20 text-zinc-600 font-light">Henüz sipariş yok.</td></tr>
+                <tr><td colSpan={7} className="text-center py-20 text-zinc-600 font-light">Henüz sipariş yok.</td></tr>
               ) : (
                 orders.map((order) => (
                   <tr key={order.id} className="hover:bg-zinc-900/30 transition-colors group">
@@ -138,25 +142,48 @@ export default function AdminOrdersPage() {
                       </div>
                     </td>
 
-                    {/* 2. MÜŞTERİ */}
+                    {/* 2. ALICI / İLETİŞİM */}
                     <td className="p-4 align-top">
-                      <div className="text-white font-light">{order.user?.fullName || 'Misafir'}</div>
-                      <div className="text-xs text-zinc-600 font-mono mt-1">{order.user?.email}</div>
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-white font-medium">
+                            {order.contactName || order.user?.fullName}
+                        </span>
+                        <span className="text-xs text-blue-400 font-mono tracking-wide">
+                            {order.phone || 'Telefon Yok'}
+                        </span>
+                        <span className="text-[10px] text-zinc-600 font-mono">
+                           {order.user?.email}
+                        </span>
+                      </div>
                     </td>
 
-                    {/* 3. TARİH */}
-                    <td className="p-4 align-top font-mono text-xs">
+                    {/* 3. TESLİMAT ADRESİ */}
+                    <td className="p-4 align-top">
+                        <div className="flex flex-col gap-2">
+                            <span className="text-xs font-bold text-white uppercase tracking-wider border-b border-zinc-700 pb-1 w-fit">
+                                {order.city || 'İL'} / {order.district || 'İLÇE'}
+                            </span>
+                            <span className="text-xs text-zinc-400 leading-relaxed break-words">
+                                {order.address || 'Açık adres bulunamadı.'}
+                            </span>
+                        </div>
+                    </td>
+
+                    {/* 4. TARİH */}
+                    <td className="p-4 align-top font-mono text-xs text-zinc-500">
                       {new Date(order.createdAt).toLocaleDateString('tr-TR')}
+                      <br/>
+                      {new Date(order.createdAt).toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'})}
                     </td>
 
-                    {/* 4. TUTAR */}
+                    {/* 5. TUTAR */}
                     <td className="p-4 align-top font-mono text-white">
                       {Number(order.totalPrice).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
                     </td>
 
-                    {/* 5. DURUM */}
+                    {/* 6. DURUM (DÜZELTİLDİ: whitespace-nowrap eklendi) */}
                     <td className="p-4 align-top">
-                      <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-widest border ${getStatusStyle(order.status)}`}>
+                      <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-widest border whitespace-nowrap ${getStatusStyle(order.status)}`}>
                         {order.status === 'PAID' ? 'Ödeme Alındı' :
                          order.status === 'SHIPPED' ? 'Kargoda' :
                          order.status === 'DELIVERED' ? 'Teslim Edildi' :
@@ -165,20 +192,14 @@ export default function AdminOrdersPage() {
                       </span>
                     </td>
                     
-                    {/* 6. İŞLEMLER */}
+                    {/* 7. İŞLEMLER */}
                     <td className="p-4 align-top text-right space-y-2">
-                      
-                      {/* Kargola Butonu */}
                       {order.status === 'PAID' && (
-                        <button 
-                          onClick={() => handleStatusChange(order.id, 'SHIPPED')} 
-                          className="block w-full text-right text-xs font-bold text-blue-500 uppercase tracking-widest hover:text-white transition-colors"
-                        >
+                        <button onClick={() => handleStatusChange(order.id, 'SHIPPED')} className="block w-full text-right text-xs font-bold text-blue-500 uppercase tracking-widest hover:text-white transition-colors">
                           Kargola →
                         </button>
                       )}
                       
-                      {/* Teslim / Geri Al */}
                       {order.status === 'SHIPPED' && (
                         <>
                           <button onClick={() => handleStatusChange(order.id, 'DELIVERED')} className="block w-full text-right text-xs font-bold text-green-500 uppercase tracking-widest hover:text-white transition-colors mb-2">Teslim Et ✓</button>
@@ -186,12 +207,8 @@ export default function AdminOrdersPage() {
                         </>
                       )}
 
-                      {/* İade Butonu */}
                       {(order.status === 'CANCELLED' || order.status === 'PAID') && (
-                          <button 
-                            onClick={() => handleRefund(order.id)}
-                            className="block w-full text-right text-xs font-bold text-purple-500 uppercase tracking-widest hover:text-white transition-colors"
-                          >
+                          <button onClick={() => handleRefund(order.id)} className="block w-full text-right text-xs font-bold text-purple-500 uppercase tracking-widest hover:text-white transition-colors">
                             İade Yap
                           </button>
                       )}
@@ -199,7 +216,6 @@ export default function AdminOrdersPage() {
                       {order.status === 'REFUNDED' && (
                           <span className="block w-full text-right text-[10px] text-zinc-600 uppercase tracking-widest">İşlem Tamam</span>
                       )}
-
                     </td>
                   </tr>
                 ))
