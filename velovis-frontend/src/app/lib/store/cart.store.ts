@@ -107,9 +107,9 @@ export const useCartStore = create<CartState>((set, get) => ({
   },
 
   // =================================================================
-  // MİKTAR GÜNCELLE (updateItemQuantity) - YENİ
+  // MİKTAR GÜNCELLE
   // =================================================================
-  updateItemQuantity: async (cartItemId: string, newQuantity: number) => {
+  updateQuantity: async (cartItemId: string, newQuantity: number) => {
     set({ isLoading: true, error: null });
     try {
       // Backend'e PATCH isteği at
