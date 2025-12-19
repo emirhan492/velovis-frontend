@@ -11,7 +11,6 @@ export default function AboutPage() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // Ekrana %60'ı girince mobilde renklenmesi için
         if (entry.isIntersecting) {
           setIsVisible(true);
         } else {
@@ -40,11 +39,6 @@ export default function AboutPage() {
         <div className="grid md:grid-cols-2 gap-16 items-center">
           
           {/* Sol: Görsel */}
-          {/* ÇÖZÜM MANTIĞI:
-              1. Mobilde: `isVisible` true ise 'grayscale-0', değilse 'grayscale'.
-              2. Masaüstünde (md:): `md:grayscale` diyerek JS'nin verdiği 'grayscale-0'ı eziyoruz ve siyah-beyazı zorluyoruz.
-              3. Masaüstü Hover (md:hover:): `md:hover:grayscale-0` diyerek sadece mouse gelince renkli yapıyoruz.
-          */}
           <div 
             ref={containerRef}
             className={`relative h-[600px] w-full overflow-hidden transition-all duration-1000 ease-in-out 
@@ -56,7 +50,6 @@ export default function AboutPage() {
               src="/pics/25642805-3c7d-46a2-ac8c-b5907bcfbfee (1).jpeg" 
               alt="Ceket Detayı"
               fill
-              // Zoom efekti hem mobilde hem masaüstünde çalışır
               className="object-cover hover:scale-105 transition-transform duration-1000 ease-out"
             />
           </div>
@@ -202,7 +195,7 @@ export default function AboutPage() {
       {/* 5. FOOTER CTA */}
       <section className="py-24 border-t border-zinc-900 flex flex-col items-center text-center px-4">
         <h2 className="text-4xl md:text-6xl font-light mb-8 tracking-tight">
-          Tarzını Tamamla.
+          Custom design,unique and premium clothes.
         </h2>
         <Link 
           href="/products" 
