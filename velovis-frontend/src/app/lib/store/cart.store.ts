@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import  api  from '../api'; // Bizim "akıllı" (auth-aware) API istemcimiz
+import api from '../api'; 
 import { useAuthStore } from './auth.store';
 
 export type CartItem = {
@@ -11,7 +11,7 @@ export type CartItem = {
     name: string;
     price: number;
     primaryPhotoUrl: string | null;
-    stockQuantity: number;
+    // stockQuantity artık gelmeyebilir, frontend'de zaten beden seçerken kontrol ettik
   };
 };
 
@@ -23,14 +23,9 @@ type CartState = {
   // Eylemler
   fetchCart: () => Promise<void>;
   addItem: (productId: string, quantity: number, size: string) => Promise<void>;
-  
-  // Sepetten bir ürünü siler
   removeItem: (cartItemId: string) => Promise<void>;
-  // Sepetteki bir ürünün miktarını günceller
   updateQuantity: (cartItemId: string, newQuantity: number) => Promise<void>;
-  // Sadece frontend'deki sepeti temizler (Çıkış yapınca kullanılır)
   clearClientCart: () => void;
-
 };
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -48,12 +43,17 @@ export const useCartStore = create<CartState>((set, get) => ({
       set({ items: data, isLoading: false });
     } catch (err: any) {
       console.error("Sepet çekilirken hata:", err);
-      set({ isLoading: false, error: "Sepet yüklenemedi." });
+      // 404 veya Auth hatası değilse hata göster
+      if(err.response?.status !== 401) {
+          set({ isLoading: false, error: "Sepet yüklenemedi." });
+      } else {
+          set({ isLoading: false });
+      }
     }
   },
 
   // =================================================================
-  // SEPETE EKLE (addItem)
+  // SEPETE EKLE (addItem) - GÜNCELLENDİ
   // =================================================================
   addItem: async (productId: string, quantity: number, size: string) => {
     set({ isLoading: true, error: null });
@@ -64,16 +64,21 @@ export const useCartStore = create<CartState>((set, get) => ({
       );
       
       const currentItems = get().items;
+      
+      // KRİTİK GÜNCELLEME: Sadece productId'ye değil, SIZE'a da bakmalıyız!
+      // Yoksa S beden sepetteyken M beden eklersen S'nin üstüne yazar.
       const existingItemIndex = currentItems.findIndex(
-        (item) => item.product.id === productId
+        (item) => item.product.id === productId && item.size === size
       );
 
       if (existingItemIndex > -1) {
+        // Var olanı güncelle
         const newItems = [...currentItems];
         newItems[existingItemIndex] = updatedOrNewItem;
         set({ items: newItems, isLoading: false });
       } else {
-        set({ items: [...currentItems, updatedOrNewItem], isLoading: false });
+        // Yeni ekle
+        set({ items: [updatedOrNewItem, ...currentItems], isLoading: false });
       }
       
     } catch (err: any) {
@@ -85,21 +90,18 @@ export const useCartStore = create<CartState>((set, get) => ({
   },
 
   // =================================================================
-  // SEPETTEN SİL (removeItem) - YENİ
+  // SEPETTEN SİL (removeItem)
   // =================================================================
   removeItem: async (cartItemId: string) => {
     set({ isLoading: true, error: null });
     try {
-      // Backend'e DELETE isteği at
       await api.delete(`/cart-items/${cartItemId}`);
 
-      // Başarılı olursa, frontend'deki 'items' listesinden bu ürünü çıkar
       const currentItems = get().items;
       const newItems = currentItems.filter((item) => item.id !== cartItemId);
       
       set({ items: newItems, isLoading: false });
     } catch (err: any) {
-      console.error("Ürün sepetten silinirken hata:", err);
       const message = err.response?.data?.message || "Ürün sepetten silinemedi.";
       set({ isLoading: false, error: message });
       throw new Error(message);
@@ -110,31 +112,47 @@ export const useCartStore = create<CartState>((set, get) => ({
   // MİKTAR GÜNCELLE
   // =================================================================
   updateQuantity: async (cartItemId: string, newQuantity: number) => {
-    set({ isLoading: true, error: null });
+    // Optimistic Update (Hızlı hissettirmek için önce arayüzü güncelle)
+    // Ama hata olursa geri alacağız.
+    const currentItems = get().items;
+    const originalItem = currentItems.find(i => i.id === cartItemId);
+    
+    if(!originalItem) return;
+
+    // Arayüzde hemen güncelle
+    const optimisticItems = currentItems.map((item) => 
+        item.id === cartItemId ? { ...item, quantity: newQuantity } : item
+    );
+    set({ items: optimisticItems });
+
     try {
-      // Backend'e PATCH isteği at
       const { data: updatedItem } = await api.patch<CartItem>(
         `/cart-items/${cartItemId}`,
         { quantity: newQuantity }
       );
 
-      // Başarılı olursa, frontend'deki 'items' listesini güncelle
-      const currentItems = get().items;
-      const newItems = currentItems.map((item) => 
+      // Backend'den gelen kesin veriyi işle
+      const finalItems = get().items.map((item) => 
         item.id === cartItemId ? updatedItem : item
       );
-      
-      set({ items: newItems, isLoading: false });
+      set({ items: finalItems });
+
     } catch (err: any) {
       console.error("Sepet miktarı güncellenirken hata:", err);
+      // Hata olursa eski haline döndür
+      const revertedItems = get().items.map((item) => 
+         item.id === cartItemId ? originalItem : item
+      );
+      set({ items: revertedItems });
+
       const message = err.response?.data?.message || "Miktar güncellenemedi.";
-      set({ isLoading: false, error: message });
+      // Hata mesajını store'da tutmak yerine fırlatabiliriz veya toast gösterebiliriz
       throw new Error(message);
     }
   },
   
   // =================================================================
-  // Sadece Frontend Sepetini Temizle (clearClientCart) - YENİ
+  // Sadece Frontend Sepetini Temizle
   // =================================================================
   clearClientCart: () => {
     set({ items: [], error: null });
@@ -142,16 +160,11 @@ export const useCartStore = create<CartState>((set, get) => ({
 
 }));
 
-// =================================================================
-// AUTH STORE İLE BAĞLANTI (GÜNCELLENDİ)
-// =================================================================
+// Auth Store Bağlantısı
 useAuthStore.subscribe((state, prevState) => {
-  // 1. Giriş yapıldıysa -> Sepeti Yükle
   if (state.isAuthenticated && !prevState.isAuthenticated) {
     useCartStore.getState().fetchCart();
   }
-  
-  // 2. Çıkış yapıldıysa -> Sepeti Temizle (Frontend)
   if (!state.isAuthenticated && prevState.isAuthenticated) {
     useCartStore.getState().clearClientCart();
   }

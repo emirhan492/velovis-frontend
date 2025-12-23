@@ -21,20 +21,30 @@ interface Comment {
   user: { firstName: string; lastName: string };
 }
 
+// YENİ: Beden Tipi
+interface ProductSize {
+  size: string;
+  stock: number;
+}
+
 interface Product {
   id: string;
   name: string;
   shortDescription: string;
   longDescription: string;
   price: number;
-  stockQuantity: number;
+  // stockQuantity ARTIK YOK (Bedenlerde tutuluyor)
+  sizes: ProductSize[]; 
   primaryPhotoUrl: string | null;
   category?: { name: string };
   photos: { id: string; url: string; isPrimary: boolean }[];
   comments?: Comment[];
 }
 
-const AVAILABLE_SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
+// Bedenleri doğru sıraya dizmek için yardımcı obje
+const SIZE_ORDER: { [key: string]: number } = {
+  'XS': 1, 'S': 2, 'M': 3, 'L': 4, 'XL': 5, 'XXL': 6, '3XL': 7
+};
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -72,11 +82,30 @@ export default function ProductDetailPage() {
 
   const isAdmin = user?.roles?.includes('ADMIN');
 
+  // --- HESAPLAMALAR ---
+
   const averageRating = useMemo(() => {
     if (!product?.comments || product.comments.length === 0) return 0;
     const total = product.comments.reduce((acc, curr) => acc + curr.rating, 0);
     return total / product.comments.length;
   }, [product?.comments]);
+
+  // Seçilen bedenin stoğunu bul
+  const currentSizeStock = useMemo(() => {
+    if (!product || !selectedSize) return 0;
+    const found = product.sizes.find(s => s.size === selectedSize);
+    return found ? found.stock : 0;
+  }, [product, selectedSize]);
+
+  // Bedenleri sıraya diz (S, M, L...)
+  const sortedSizes = useMemo(() => {
+    if (!product?.sizes) return [];
+    return [...product.sizes].sort((a, b) => {
+      const orderA = SIZE_ORDER[a.size] || 99;
+      const orderB = SIZE_ORDER[b.size] || 99;
+      return orderA - orderB;
+    });
+  }, [product?.sizes]);
 
   const fetchProduct = async () => {
     try {
@@ -104,7 +133,8 @@ export default function ProductDetailPage() {
     if (productId) fetchProduct();
   }, [productId]);
 
-  // --- TARİH FORMATLAYICI ---
+  // --- HANDLERS ---
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('tr-TR', {
       year: 'numeric',
@@ -127,16 +157,28 @@ export default function ProductDetailPage() {
   const handlePrev = () => changeImage((currentIndex - 1 + allPhotos.length) % allPhotos.length);
   const handleThumbnailClick = (index: number) => changeImage(index);
 
+  // Beden değişince adeti 1'e çek (Stok sorunu olmasın diye)
+  const handleSizeSelect = (size: string) => {
+    setSelectedSize(size);
+    setQuantity(1);
+    setError(null);
+  };
+
   const handleAddToCart = async () => {
     setError(null); setSuccess(null);
     if (!isAuthenticated) { router.push('/login'); return; }
     if (!selectedSize) { setError("Lütfen bir beden seçiniz."); return; }
     if (!product) return;
 
-    const itemInCart = cartItems.find((item) => item.product.id === product.id);
+    // Seçilen bedenin stoğunu kontrol et
+    const targetSizeObj = product.sizes.find(s => s.size === selectedSize);
+    const stockAvailable = targetSizeObj ? targetSizeObj.stock : 0;
+
+    const itemInCart = cartItems.find((item) => item.product.id === product.id && item.size === selectedSize);
     const qtyInCart = itemInCart ? itemInCart.quantity : 0;
-    if ((qtyInCart + quantity) > product.stockQuantity) {
-        setError("Stok yetersiz."); return;
+
+    if ((qtyInCart + quantity) > stockAvailable) {
+        setError(`Stok yetersiz. (Kalan: ${stockAvailable})`); return;
     }
 
     try {
@@ -220,44 +262,101 @@ export default function ProductDetailPage() {
               <div className="flex items-center gap-6">
                  <p className="text-2xl md:text-3xl font-mono text-zinc-300">₺{Number(product.price).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</p>
                  <div className="flex items-center text-yellow-600 gap-1 cursor-help" title={`Ortalama: ${averageRating.toFixed(1)}`}>
-                    {[...Array(5)].map((_, i) => (
-                        <StarIconSolid key={i} className={`w-4 h-4 ${i < Math.round(averageRating) ? 'opacity-100' : 'opacity-30'}`} />
-                    ))}
-                    <span className="text-xs text-zinc-500 ml-1 font-mono border-b border-zinc-800 pb-0.5">
-                      ({product.comments?.length || 0})
-                    </span>
+                   {[...Array(5)].map((_, i) => (
+                       <StarIconSolid key={i} className={`w-4 h-4 ${i < Math.round(averageRating) ? 'opacity-100' : 'opacity-30'}`} />
+                   ))}
+                   <span className="text-xs text-zinc-500 ml-1 font-mono border-b border-zinc-800 pb-0.5">
+                     ({product.comments?.length || 0})
+                   </span>
                  </div>
               </div>
             </div>
             <p className="text-zinc-400 leading-relaxed font-light text-lg">{product.longDescription}</p>
+            
+            {/* BEDEN SEÇİMİ (GÜNCELLENDİ) */}
             <div className="space-y-4 pt-4">
-               <div className="flex justify-between items-center"><span className="text-xs font-bold uppercase tracking-widest text-zinc-500">Beden Seçin</span></div>
-               <div className="flex gap-4">
-                  {AVAILABLE_SIZES.map((size) => (
-                    <button key={size} onClick={() => setSelectedSize(size)} className={`w-12 h-12 flex items-center justify-center border text-sm font-medium transition-all duration-300 ${selectedSize === size ? 'bg-white text-black border-white' : 'bg-transparent text-zinc-400 border-zinc-800 hover:border-zinc-500 hover:text-white'}`}>{size}</button>
-                  ))}
+               <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                    {selectedSize ? `Seçilen: ${selectedSize}` : 'Beden Seçin'}
+                  </span>
+                  {selectedSize && (
+                    <span className="text-[15px] text-zinc-500 font-mono">
+                      {currentSizeStock < 5 && currentSizeStock > 0 ? `Son ${currentSizeStock} ürün!` : currentSizeStock > 0 ? 'Stokta Var' : 'Tükendi'}
+                    </span>
+                  )}
+               </div>
+               <div className="flex flex-wrap gap-4">
+                  {sortedSizes.length > 0 ? (
+                    sortedSizes.map((sizeObj) => {
+                      const isOutOfStock = sizeObj.stock <= 0;
+                      return (
+                        <button 
+                          key={sizeObj.size} 
+                          onClick={() => !isOutOfStock && handleSizeSelect(sizeObj.size)} 
+                          disabled={isOutOfStock}
+                          className={`
+                            w-12 h-12 flex items-center justify-center border text-sm font-medium transition-all duration-300 relative
+                            ${selectedSize === sizeObj.size 
+                              ? 'bg-white text-black border-white' 
+                              : isOutOfStock 
+                                ? 'bg-zinc-900 text-zinc-600 border-zinc-800 cursor-not-allowed opacity-50 line-through decoration-zinc-600'
+                                : 'bg-transparent text-zinc-400 border-zinc-800 hover:border-zinc-500 hover:text-white'
+                            }
+                          `}
+                        >
+                          {sizeObj.size}
+                        </button>
+                      )
+                    })
+                  ) : (
+                    <p className="text-xs text-zinc-500 italic">Beden bilgisi bulunamadı.</p>
+                  )}
                </div>
                {!selectedSize && error === "Lütfen bir beden seçiniz." && <p className="text-red-500 text-xs mt-2 animate-pulse">Lütfen sepete eklemeden önce beden seçiniz.</p>}
             </div>
+
+            {/* ADET SEÇİMİ (STOK KONTROLLÜ) */}
             <div className="flex items-center justify-between border border-zinc-800 p-4 mt-4">
                <span className="text-zinc-500 uppercase tracking-widest text-xs">Adet</span>
                <div className="flex items-center space-x-6">
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="text-xl hover:text-zinc-300">-</button>
+                  <button 
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))} 
+                    className="text-xl hover:text-zinc-300 disabled:opacity-30"
+                    disabled={!selectedSize || currentSizeStock === 0}
+                  >-</button>
                   <span className="text-lg font-mono w-4 text-center">{quantity}</span>
-                  <button onClick={() => setQuantity(Math.min(product.stockQuantity, quantity + 1))} className="text-xl hover:text-zinc-300">+</button>
+                  <button 
+                    onClick={() => setQuantity(Math.min(currentSizeStock, quantity + 1))} 
+                    className="text-xl hover:text-zinc-300 disabled:opacity-30"
+                    disabled={!selectedSize || currentSizeStock === 0 || quantity >= currentSizeStock}
+                  >+</button>
                </div>
             </div>
+
+            {/* SEPETE EKLE BUTONU */}
             <div className="pt-6 space-y-4">
-              <button onClick={handleAddToCart} disabled={product.stockQuantity <= 0 || isCartLoading} className={`w-full py-5 text-sm font-bold uppercase tracking-[0.2em] transition-all duration-300 border border-white ${product.stockQuantity > 0 ? 'hover:bg-white hover:text-black text-white' : 'opacity-50 cursor-not-allowed text-zinc-500 border-zinc-800'}`}>
-                {isCartLoading ? 'Ekleniyor...' : (product.stockQuantity > 0 ? 'Sepete Ekle' : 'Tükendi')}
+              <button 
+                onClick={handleAddToCart} 
+                disabled={!selectedSize || currentSizeStock <= 0 || isCartLoading} 
+                className={`w-full py-5 text-sm font-bold uppercase tracking-[0.2em] transition-all duration-300 border border-white 
+                  ${(selectedSize && currentSizeStock > 0) 
+                    ? 'hover:bg-white hover:text-black text-white' 
+                    : 'opacity-50 cursor-not-allowed text-zinc-500 border-zinc-800 bg-zinc-900/50'
+                  }`}
+              >
+                {isCartLoading ? 'Ekleniyor...' : 
+                  !selectedSize ? 'Beden Seçiniz' :
+                  currentSizeStock <= 0 ? 'Tükendi' : 'Sepete Ekle'
+                }
               </button>
+              
               {error && error !== "Lütfen bir beden seçiniz." && <div className="p-3 border border-red-900/50 bg-red-900/10 text-red-400 text-xs text-center uppercase tracking-wide">{error}</div>}
               {success && <div className="p-3 border border-green-900/50 bg-green-900/10 text-green-400 text-xs text-center uppercase tracking-wide">{success}</div>}
             </div>
           </div>
         </div>
 
-        {/* ================= YORUMLAR BÖLÜMÜ ================= */}
+        {/* ================= YORUMLAR BÖLÜMÜ (AYNI KALDI) ================= */}
         <div className="border-t border-zinc-900 pt-24">
             <h2 className="text-2xl font-light uppercase tracking-widest mb-12 text-center">Değerlendirmeler</h2>
             
@@ -366,12 +465,12 @@ export default function ProductDetailPage() {
                                           {/* DÜZENLENDİ BİLGİSİ */}
                                           {isEdited && (
                                             <div className="mt-3 text-[10px] text-zinc-600 italic flex items-center gap-1">
-                                               <PencilSquareIcon className="w-3 h-3" />
-                                               {comment.editedByAdmin ? (
-                                                  <span>Admin tarafından düzenlendi &bull; {formatDate(comment.updatedAt)}</span>
-                                               ) : (
-                                                  <span>Düzenlendi &bull; {formatDate(comment.updatedAt)}</span>
-                                               )}
+                                                <PencilSquareIcon className="w-3 h-3" />
+                                                {comment.editedByAdmin ? (
+                                                   <span>Admin tarafından düzenlendi &bull; {formatDate(comment.updatedAt)}</span>
+                                                ) : (
+                                                   <span>Düzenlendi &bull; {formatDate(comment.updatedAt)}</span>
+                                                )}
                                             </div>
                                           )}
                                         </>

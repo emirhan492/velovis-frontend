@@ -6,13 +6,14 @@ import Image from "next/image";
 import api from "src/app/lib/api";
 import { TrashIcon, PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
 
+// GÜNCELLENDİ: Backend artık stockQuantity değil, sizes gönderiyor
 interface Product {
   id: string;
   name: string;
   price: number;
-  stockQuantity: number;
   primaryPhotoUrl: string | null;
   category: { name: string };
+  sizes: { stock: number }[]; // YENİ: Beden Listesi
 }
 
 export default function AdminProductsPage() {
@@ -46,10 +47,10 @@ export default function AdminProductsPage() {
 
   // URL DÜZELTİCİ
   const getValidImageUrl = (url: string | null) => {
-    if (!url) return "https://via.placeholder.com/150"; // Resim yoksa placeholder
-    if (url.startsWith("http")) return url; // Dış linkse (Unsplash vb.) dokunma
-    if (url.startsWith("/")) return url; // Zaten başında / varsa dokunma
-    return `/${url}`; // Başında / yoksa ekle (pics/ceket.jpg -> /pics/ceket.jpg)
+    if (!url) return "https://via.placeholder.com/150"; 
+    if (url.startsWith("http")) return url; 
+    if (url.startsWith("/")) return url; 
+    return `/${url}`; 
   };
 
   if (loading) return <div className="min-h-screen bg-black text-white p-8 pt-24 animate-pulse">YÜKLENİYOR...</div>;
@@ -78,51 +79,64 @@ export default function AdminProductsPage() {
                 <th className="p-4 font-medium">Ürün Adı</th>
                 <th className="p-4 font-medium">Kategori</th>
                 <th className="p-4 font-medium">Fiyat</th>
-                <th className="p-4 font-medium">Stok</th>
+                <th className="p-4 font-medium">Toplam Stok</th>
                 <th className="p-4 font-medium text-right">İşlemler</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800">
-              {products.map((product) => (
-                <tr key={product.id} className="hover:bg-zinc-900/50 transition-colors">
-                  <td className="p-4">
-                    <div className="w-12 h-16 relative bg-zinc-800 overflow-hidden">
-                      <Image
-                        src={getValidImageUrl(product.primaryPhotoUrl)}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  </td>
-                  <td className="p-4 text-white font-medium">{product.name}</td>
-                  <td className="p-4">{product.category?.name || '-'}</td>
-                  <td className="p-4 font-mono text-white">
-                    ₺{Number(product.price).toLocaleString("tr-TR")}
-                  </td>
-                  <td className="p-4">
-                    {product.stockQuantity > 0 ? (
-                      <span className="text-green-500">{product.stockQuantity} Adet</span>
-                    ) : (
-                      <span className="text-red-500">Tükendi</span>
-                    )}
-                  </td>
-                  <td className="p-4 text-right space-x-4">
-                    <Link 
-                      href={`/admin/products/${product.id}/edit`}
-                      className="inline-block text-blue-400 hover:text-blue-300 transition-colors"
-                    >
-                      <PencilSquareIcon className="w-5 h-5" />
-                    </Link>
-                    <button 
-                      onClick={() => handleDelete(product.id)}
-                      className="text-red-500 hover:text-red-400 transition-colors"
-                    >
-                      <TrashIcon className="w-5 h-5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {products.map((product) => {
+                
+                // YENİ: Toplam Stoğu Hesapla
+                // product.sizes dizisindeki her bir bedenin stoğunu topluyoruz.
+                const totalStock = product.sizes 
+                  ? product.sizes.reduce((acc, size) => acc + size.stock, 0) 
+                  : 0;
+
+                return (
+                  <tr key={product.id} className="hover:bg-zinc-900/50 transition-colors">
+                    <td className="p-4">
+                      <div className="w-12 h-16 relative bg-zinc-800 overflow-hidden">
+                        <Image
+                          src={getValidImageUrl(product.primaryPhotoUrl)}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    </td>
+                    <td className="p-4 text-white font-medium">{product.name}</td>
+                    <td className="p-4">{product.category?.name || '-'}</td>
+                    <td className="p-4 font-mono text-white">
+                      ₺{Number(product.price).toLocaleString("tr-TR")}
+                    </td>
+                    <td className="p-4">
+                      {totalStock > 0 ? (
+                        <span className="text-green-500 font-bold">{totalStock} Adet</span>
+                      ) : (
+                        <span className="text-red-500 font-bold">Tükendi</span>
+                      )}
+                      {/* İpucu: Beden detayını görmek istersen mouse üstüne gelince gösterelim */}
+                      <div className="text-[10px] text-zinc-600 mt-1">
+                        {product.sizes?.map(s => `${s.stock} adet`).join(', ')}
+                      </div>
+                    </td>
+                    <td className="p-4 text-right space-x-4">
+                      <Link 
+                        href={`/admin/products/${product.id}/edit`}
+                        className="inline-block text-blue-400 hover:text-blue-300 transition-colors"
+                      >
+                        <PencilSquareIcon className="w-5 h-5" />
+                      </Link>
+                      <button 
+                        onClick={() => handleDelete(product.id)}
+                        className="text-red-500 hover:text-red-400 transition-colors"
+                      >
+                        <TrashIcon className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
