@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Velovis Wear",
-  description: "NestJS ve Next.js ile geliştirilen e-ticaret projesi",
+  description: "Custom design,unique and premium clothes.",
 };
 
 export default function RootLayout({
