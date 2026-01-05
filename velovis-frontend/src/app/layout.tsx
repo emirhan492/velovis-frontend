@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Velovis Wear',
     description: 'Custom design, unique and premium clothes.',
-    url: 'https://www.velovis.com',
+    url: 'https://www.veloviswear.com',
     siteName: 'Velovis Wear',
     locale: 'tr_TR',
     type: 'website',
