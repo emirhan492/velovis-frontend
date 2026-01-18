@@ -21,7 +21,6 @@ interface Comment {
   user: { firstName: string; lastName: string };
 }
 
-// YENİ: Beden Tipi
 interface ProductSize {
   size: string;
   stock: number;
@@ -33,7 +32,6 @@ interface Product {
   shortDescription: string;
   longDescription: string;
   price: number;
-  // stockQuantity ARTIK YOK (Bedenlerde tutuluyor)
   sizes: ProductSize[]; 
   primaryPhotoUrl: string | null;
   category?: { name: string };
@@ -41,7 +39,6 @@ interface Product {
   comments?: Comment[];
 }
 
-// Bedenleri doğru sıraya dizmek için yardımcı obje
 const SIZE_ORDER: { [key: string]: number } = {
   'XS': 1, 'S': 2, 'M': 3, 'L': 4, 'XL': 5, 'XXL': 6, '3XL': 7
 };
@@ -83,21 +80,18 @@ export default function ProductDetailPage() {
   const isAdmin = user?.roles?.includes('ADMIN');
 
   // --- HESAPLAMALAR ---
-
   const averageRating = useMemo(() => {
     if (!product?.comments || product.comments.length === 0) return 0;
     const total = product.comments.reduce((acc, curr) => acc + curr.rating, 0);
     return total / product.comments.length;
   }, [product?.comments]);
 
-  // Seçilen bedenin stoğunu bul
   const currentSizeStock = useMemo(() => {
     if (!product || !selectedSize) return 0;
     const found = product.sizes.find(s => s.size === selectedSize);
     return found ? found.stock : 0;
   }, [product, selectedSize]);
 
-  // Bedenleri sıraya diz (S, M, L...)
   const sortedSizes = useMemo(() => {
     if (!product?.sizes) return [];
     return [...product.sizes].sort((a, b) => {
@@ -134,14 +128,9 @@ export default function ProductDetailPage() {
   }, [productId]);
 
   // --- HANDLERS ---
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('tr-TR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
   };
 
@@ -157,7 +146,6 @@ export default function ProductDetailPage() {
   const handlePrev = () => changeImage((currentIndex - 1 + allPhotos.length) % allPhotos.length);
   const handleThumbnailClick = (index: number) => changeImage(index);
 
-  // Beden değişince adeti 1'e çek (Stok sorunu olmasın diye)
   const handleSizeSelect = (size: string) => {
     setSelectedSize(size);
     setQuantity(1);
@@ -166,11 +154,11 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = async () => {
     setError(null); setSuccess(null);
-    if (!isAuthenticated) { router.push('/login'); return; }
+    
+
     if (!selectedSize) { setError("Lütfen bir beden seçiniz."); return; }
     if (!product) return;
 
-    // Seçilen bedenin stoğunu kontrol et
     const targetSizeObj = product.sizes.find(s => s.size === selectedSize);
     const stockAvailable = targetSizeObj ? targetSizeObj.stock : 0;
 
@@ -273,7 +261,7 @@ export default function ProductDetailPage() {
             </div>
             <p className="text-zinc-400 leading-relaxed font-light text-lg">{product.longDescription}</p>
             
-            {/* BEDEN SEÇİMİ (GÜNCELLENDİ) */}
+            {/* BEDEN SEÇİMİ */}
             <div className="space-y-4 pt-4">
                <div className="flex justify-between items-center">
                   <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">
@@ -315,7 +303,7 @@ export default function ProductDetailPage() {
                {!selectedSize && error === "Lütfen bir beden seçiniz." && <p className="text-red-500 text-xs mt-2 animate-pulse">Lütfen sepete eklemeden önce beden seçiniz.</p>}
             </div>
 
-            {/* ADET SEÇİMİ (STOK KONTROLLÜ) */}
+            {/* ADET SEÇİMİ */}
             <div className="flex items-center justify-between border border-zinc-800 p-4 mt-4">
                <span className="text-zinc-500 uppercase tracking-widest text-xs">Adet</span>
                <div className="flex items-center space-x-6">
@@ -356,7 +344,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* ================= YORUMLAR BÖLÜMÜ (AYNI KALDI) ================= */}
+        {/* YORUMLAR */}
         <div className="border-t border-zinc-900 pt-24">
             <h2 className="text-2xl font-light uppercase tracking-widest mb-12 text-center">Değerlendirmeler</h2>
             
@@ -404,25 +392,20 @@ export default function ProductDetailPage() {
                             const isOwner = user?.id === comment.userId;
                             const canEdit = isOwner || isAdmin;
                             const isEditing = editingCommentId === comment.id;
-                            
                             const isEdited = comment.createdAt !== comment.updatedAt;
 
                             return (
                                 <div key={comment.id} className="border-b border-zinc-900 pb-8 last:border-0 group hover:bg-zinc-900/20 p-4 transition-colors rounded-sm">
-                                    
-                                    {/* BAŞLIK */}
                                     <div className="flex justify-between items-start mb-3">
                                         <div>
                                             <span className="text-white font-medium text-sm block mb-1">
                                                 {comment.user.firstName} {comment.user.lastName.charAt(0)}.
                                             </span>
-                                            {/* TARİH GÖSTERİMİ*/}
                                             <span className="text-zinc-600 text-[10px] font-mono uppercase tracking-wide">
                                                 {formatDate(comment.createdAt)}
                                             </span>
                                         </div>
                                         
-                                        {/* İŞLEMLER */}
                                         {!isEditing && (
                                             <div className="flex items-center gap-4">
                                                 <div className="flex text-yellow-600 gap-0.5">
@@ -440,7 +423,6 @@ export default function ProductDetailPage() {
                                         )}
                                     </div>
 
-                                    {/* İÇERİK */}
                                     {isEditing ? (
                                         <div className="space-y-3 animate-in fade-in zoom-in duration-300">
                                             <div className="flex gap-1 mb-2">
@@ -462,7 +444,6 @@ export default function ProductDetailPage() {
                                               {comment.content}
                                           </p>
                                           
-                                          {/* DÜZENLENDİ BİLGİSİ */}
                                           {isEdited && (
                                             <div className="mt-3 text-[10px] text-zinc-600 italic flex items-center gap-1">
                                                 <PencilSquareIcon className="w-3 h-3" />
@@ -480,10 +461,8 @@ export default function ProductDetailPage() {
                         })
                     )}
                 </div>
-
             </div>
         </div>
-
       </div>
     </div>
   );

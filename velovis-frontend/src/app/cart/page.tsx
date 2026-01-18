@@ -6,21 +6,31 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation'; 
 import { TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
 import { useCartStore } from 'src/app/lib/store/cart.store';
+import { useAuthStore } from 'src/app/lib/store/auth.store'; 
 
 export default function CartPage() {
   const router = useRouter();
   
   const { items, removeItem, updateQuantity, fetchCart } = useCartStore();
+  const { isAuthenticated } = useAuthStore();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchCart().finally(() => setLoading(false));
   }, [fetchCart]);
 
-  // SADECE ÜRÜN TOPLAMI (Kargo Yok)
+  // SADECE ÜRÜN TOPLAMI
   const total = items.reduce((total, item) => {
     return total + Number(item.product.price) * item.quantity;
   }, 0);
+
+  const handleProceedToCheckout = () => {
+    if (isAuthenticated) {
+      router.push('/checkout');
+    } else {
+      router.push('/login?action=checkout');
+    }
+  };
 
   if (loading) {
     return (
@@ -117,7 +127,7 @@ export default function CartPage() {
             ))}
           </div>
 
-          {/* SAĞ: ÖZET (KARGO KALDIRILDI) */}
+          {/* SAĞ: ÖZET */}
           <div className="lg:col-span-1">
             <div className="bg-zinc-900/30 border border-zinc-800 p-6 sticky top-32">
               <h2 className="text-lg font-light uppercase tracking-widest mb-6 border-b border-zinc-800 pb-4">
@@ -129,7 +139,6 @@ export default function CartPage() {
                   <span>Ara Toplam</span>
                   <span className="font-mono">₺{total.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
                 </div>
-                {/* KARGO SATIRI SİLİNDİ */}
               </div>
 
               <div className="flex justify-between text-lg font-medium text-white border-t border-zinc-800 pt-4 mb-8">
@@ -138,13 +147,12 @@ export default function CartPage() {
               </div>
 
               <button
-                onClick={() => router.push('/checkout')} 
+                onClick={handleProceedToCheckout} 
                 className="w-full bg-white text-black py-4 font-bold uppercase tracking-widest hover:bg-zinc-200 transition-colors"
               >
                 Siparişi Tamamla
               </button>
               
-
             </div>
           </div>
 
