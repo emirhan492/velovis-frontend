@@ -46,7 +46,6 @@ export default function Header() {
         
         {/* 1. LOGO (SOL) */}
         <Link href="/" className="relative block w-32 h-8 md:w-40 md:h-10 md:-ml-8 hover:opacity-80 transition-opacity">
-
           <Image 
             src="/pics/header_logo.png" 
             alt="Velovis Logo" 
@@ -59,9 +58,8 @@ export default function Header() {
         {/* 2. SAĞ TARAF (LİNKLER + SEPET + PROFİL) */}
         <div className="flex items-center gap-4 md:gap-8">
           
-          {/* --- MENÜ LİNKLERİ --- */}
           
-          {/* Koleksiyon: SADECE BİLGİSAYARDA GÖRÜNSÜN (hidden md:block) */}
+          {/* Koleksiyon */}
           <Link href="/products" className="hidden md:block text-[10px] md:text-xs uppercase tracking-widest text-zinc-400 hover:text-white transition-colors font-bold">
             Koleksiyon
           </Link>
@@ -71,10 +69,17 @@ export default function Header() {
             Hakkında
           </Link>
 
+          {/* SİPARİŞ TAKİP */}
+          {!isAuthenticated && (
+            <Link href="/order-tracking" className="text-[10px] md:text-xs uppercase tracking-widest text-zinc-400 hover:text-white transition-colors font-bold">
+              Sipariş Sorgula
+            </Link>
+          )}
+
           {/* AYIRAÇ ÇİZGİSİ */}
           <div className="h-4 w-px bg-zinc-800"></div>
 
-          {/* --- SEPET --- */}
+          {/* SEPET */}
           <Link href="/cart" className="text-zinc-400 hover:text-white relative transition-colors group flex items-center gap-1">
             <ShoppingBagIcon className="w-5 h-5" />
             {totalItemCount > 0 && (
@@ -84,7 +89,7 @@ export default function Header() {
             )}
           </Link>
 
-          {/* --- PROFİL / GİRİŞ --- */}
+          {/* PROFİL / GİRİŞ  */}
           {isAuthenticated && user ? (
             <Menu as="div" className="relative inline-block text-left">
               <div>
