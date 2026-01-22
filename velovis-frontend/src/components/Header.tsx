@@ -45,8 +45,7 @@ export default function Header() {
       <nav className="container mx-auto flex items-center justify-between px-4 py-4">
         
         {/* 1. LOGO (SOL) */}
-        <Link href="/" className="relative block w-32 h-8 md:w-40 md:h-10 md:-ml-8 hover:opacity-80 transition-opacity">
-
+        <Link href="/" className="relative block w-32 h-8 md:w-40 md:h-10 md:-ml-8 hover:opacity-80 transition-opacity flex-shrink-0">
           <Image 
             src="/pics/header_logo.png" 
             alt="Velovis Logo" 
@@ -56,25 +55,81 @@ export default function Header() {
           />
         </Link>
 
-        {/* 2. SAĞ TARAF (LİNKLER + SEPET + PROFİL) */}
+        {/* 2. ORTA BÖLÜM (LİNKLER) */}
         <div className="flex items-center gap-4 md:gap-8">
           
-          {/* --- MENÜ LİNKLERİ --- */}
-          
-          {/* Koleksiyon: SADECE BİLGİSAYARDA GÖRÜNSÜN (hidden md:block) */}
-          <Link href="/products" className="hidden md:block text-[10px] md:text-xs uppercase tracking-widest text-zinc-400 hover:text-white transition-colors font-bold">
-            Koleksiyon
-          </Link>
+          {/* A) MASAÜSTÜ LİNKLERİ (Sadece PC'de görünür) */}
+          <div className="hidden md:flex items-center gap-8">
+            <Link href="/products" className="text-xs uppercase tracking-widest text-zinc-400 hover:text-white transition-colors font-bold">
+              Koleksiyon
+            </Link>
+            <Link href="/about" className="text-xs uppercase tracking-widest text-zinc-400 hover:text-white transition-colors font-bold">
+              Hakkında
+            </Link>
+            {!isAuthenticated && (
+              <Link href="/order-tracking" className="text-xs uppercase tracking-widest text-zinc-400 hover:text-white transition-colors font-bold">
+                Sipariş Sorgula
+              </Link>
+            )}
+          </div>
 
-          {/* Hakkında */}
-          <Link href="/about" className="text-[10px] md:text-xs uppercase tracking-widest text-zinc-400 hover:text-white transition-colors font-bold">
-            Hakkında
-          </Link>
+          {/* B) MOBİL MENÜ (Sadece Telefonda görünür - SPLIT BUTTON) */}
+          <div className="md:hidden flex items-center">
+            
+            {/* 1. Parça: Direkt Link (HAKKINDA) */}
+            <Link 
+              href="/about" 
+              className="text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-white transition-colors mr-1"
+            >
+              HAKKINDA
+            </Link>
+
+            {/* 2. Parça: Dropdown Tetikleyici (Sadece Ok) */}
+            <Menu as="div" className="relative inline-block text-left">
+              <Menu.Button className="flex items-center justify-center w-6 h-6 text-zinc-400 hover:text-white focus:outline-none transition-colors">
+                <ChevronDownIcon className="h-3 w-3" aria-hidden="true" />
+              </Menu.Button>
+
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-100"
+                enterFrom="transform opacity-0 scale-95"
+                enterTo="transform opacity-100 scale-100"
+                leave="transition ease-in duration-75"
+                leaveFrom="transform opacity-100 scale-100"
+                leaveTo="transform opacity-0 scale-95"
+              >
+                {/* Menü Kutusu */}
+                <Menu.Items className="absolute left-1/2 transform -translate-x-1/2 mt-4 w-40 origin-top divide-y divide-zinc-800 rounded-sm border border-zinc-800 bg-black shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+                  <div className="py-1">
+                    {/* Menü içinde diğer linkleri gösteriyoruz */}
+                    <Menu.Item>
+                      {({ active }) => (
+                        <Link href="/products" className={`${active ? 'bg-zinc-900 text-white' : 'text-zinc-400'} block px-4 py-3 text-xs uppercase tracking-widest transition-colors`}>
+                          Koleksiyon
+                        </Link>
+                      )}
+                    </Menu.Item>
+                    
+                    {!isAuthenticated && (
+                      <Menu.Item>
+                        {({ active }) => (
+                          <Link href="/order-tracking" className={`${active ? 'bg-zinc-900 text-white' : 'text-zinc-400'} block px-4 py-3 text-xs uppercase tracking-widest transition-colors`}>
+                            Sipariş Sorgula
+                          </Link>
+                        )}
+                      </Menu.Item>
+                    )}
+                  </div>
+                </Menu.Items>
+              </Transition>
+            </Menu>
+          </div>
 
           {/* AYIRAÇ ÇİZGİSİ */}
           <div className="h-4 w-px bg-zinc-800"></div>
 
-          {/* --- SEPET --- */}
+          {/* SEPET */}
           <Link href="/cart" className="text-zinc-400 hover:text-white relative transition-colors group flex items-center gap-1">
             <ShoppingBagIcon className="w-5 h-5" />
             {totalItemCount > 0 && (
@@ -84,7 +139,7 @@ export default function Header() {
             )}
           </Link>
 
-          {/* --- PROFİL / GİRİŞ --- */}
+          {/* PROFİL / GİRİŞ */}
           {isAuthenticated && user ? (
             <Menu as="div" className="relative inline-block text-left">
               <div>
@@ -167,9 +222,9 @@ export default function Header() {
             </Menu>
           ) : (
             // GİRİŞ YAPMAMIŞ
-            <div className="flex items-center space-x-4 text-[10px] md:text-xs uppercase tracking-widest">
-              <Link href="/login" className="text-zinc-400 hover:text-white transition-colors font-bold">Giriş</Link>
-              <Link href="/register" className="border border-white px-3 py-1.5 text-white hover:bg-white hover:text-black transition-all duration-300 font-bold">
+            <div className="flex items-center space-x-2 md:space-x-4 text-[10px] md:text-xs uppercase tracking-widest">
+              <Link href="/login" className="text-zinc-400 hover:text-white transition-colors font-bold whitespace-nowrap">Giriş</Link>
+              <Link href="/register" className="border border-white px-2 py-1 md:px-3 md:py-1.5 text-white hover:bg-white hover:text-black transition-all duration-300 font-bold whitespace-nowrap">
                 Kayıt Ol
               </Link>
             </div>

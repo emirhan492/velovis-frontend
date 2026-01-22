@@ -13,12 +13,11 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://www.veloviswear.com'), 
 
   title: {
-    default: "Velovis Wear | Custom design,unique and premium clothes.",
+    default: "Velovis Wear",
     template: "%s | Velovis Wear",
   },
-  description: "Velovis Wear ile tarzını yansıt. Özel tasarım, yüksek kaliteli streetwear giyim ve ceket koleksiyonlarını keşfet.",
-  
-  keywords: ["streetwear", "giyim", "özel tasarım", "velovis", "moda", "premium giyim"],
+  description: "Custom design, unique and premium clothes.",
+
 
   openGraph: {
     title: 'Velovis Wear',
@@ -115,7 +114,7 @@ export default function RootLayout({
             {/* Header En Üstte */}
             <Header />
             
-            {/* Main: İçeriğin olduğu kısım */}
+            {/* Main */}
             <main className="flex-1">
               {children}
             </main>

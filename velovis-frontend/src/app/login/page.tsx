@@ -1,11 +1,9 @@
-
-
 "use client";
 
 import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import api from '../lib/api';
+import api from '../lib/api'; 
 import { useAuthStore } from '../lib/store/auth.store';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
 
@@ -38,6 +36,8 @@ function LoginPage() {
   const { login } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const showGuestOption = searchParams.get('action') === 'checkout';
 
   useEffect(() => {
     const activated = searchParams.get('activated');
@@ -72,7 +72,14 @@ function LoginPage() {
       });
       
       login(tokens, user);
-      router.push('/');
+
+    
+      if (showGuestOption) {
+        router.push('/checkout');
+      } else {
+        router.push('/');
+      }
+
     } catch (err: any) {
       console.error(err);
       const message = err.response?.data?.message || "Kullanıcı adı veya parola hatalı.";
@@ -168,7 +175,7 @@ function LoginPage() {
             </div>
           </div>
 
-          {/* Buton */}
+          {/* Giriş Yap */}
           <button
             type="submit"
             disabled={isLoading}
@@ -177,8 +184,27 @@ function LoginPage() {
             {isLoading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
           </button>
 
-          {/* Linkler (Şifremi Unuttum & Kayıt Ol) */}
-          <div className="flex flex-col items-center space-y-4 mt-8 pt-8 border-t border-zinc-900">
+          {/* MİSAFİR GİRİŞİ */}
+          {showGuestOption && (
+            <>
+              <div className="relative flex items-center py-2">
+                <div className="flex-grow border-t border-zinc-900"></div>
+                <span className="flex-shrink-0 mx-4 text-zinc-600 text-[10px] uppercase tracking-widest">veya</span>
+                <div className="flex-grow border-t border-zinc-900"></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => router.push('/checkout')}
+                className="w-full py-4 bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold uppercase tracking-[0.2em] hover:bg-zinc-800 hover:text-white transition-colors"
+              >
+                Üye Olmadan Devam Et
+              </button>
+            </>
+          )}
+
+          {/* Linkler */}
+          <div className="flex flex-col items-center space-y-4 pt-4">
             <Link 
               href="/forgot-password" 
               className="text-xs text-zinc-500 hover:text-white uppercase tracking-widest transition-colors"

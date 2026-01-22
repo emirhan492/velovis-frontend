@@ -9,7 +9,13 @@ interface AdminOrder {
   totalPrice: number;
   status: string;
   createdAt: string;
-  user: { fullName: string; email: string };
+
+  user?: { fullName: string; email: string };
+  
+  // Misafir Bilgileri
+  guestName?: string;
+  guestEmail?: string;
+
   // Adres Alanları
   contactName: string | null;
   city: string | null;
@@ -121,7 +127,7 @@ export default function AdminOrdersPage() {
                 orders.map((order) => (
                   <tr key={order.id} className="hover:bg-zinc-900/30 transition-colors group">
                     
-                    {/* 1. ÜRÜNLER */}
+                    {/* ÜRÜNLER */}
                     <td className="p-4 align-top">
                       <div className="flex flex-col space-y-3">
                         {order.items.map((item) => (
@@ -142,22 +148,33 @@ export default function AdminOrdersPage() {
                       </div>
                     </td>
 
-                    {/* 2. ALICI / İLETİŞİM */}
+                    {/* ALICI / İLETİŞİM */}
                     <td className="p-4 align-top">
                       <div className="flex flex-col space-y-1">
-                        <span className="text-white font-medium">
-                            {order.contactName || order.user?.fullName}
-                        </span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-white font-medium">
+                                {order.contactName || order.user?.fullName || order.guestName}
+                            </span>
+                            {/* Misafir Etiketi */}
+                            {!order.user && (
+                                <span className="text-[9px] font-bold bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                    MİSAFİR
+                                </span>
+                            )}
+                        </div>
+                        
                         <span className="text-xs text-blue-400 font-mono tracking-wide">
                             {order.phone || 'Telefon Yok'}
                         </span>
-                        <span className="text-[10px] text-zinc-600 font-mono">
-                           {order.user?.email}
+                        
+                        {/* Email Gösterimi */}
+                        <span className="text-[13px] text-zinc-600 font-mono break-all">
+                            {order.user?.email || order.guestEmail || 'Email Yok'}
                         </span>
                       </div>
                     </td>
 
-                    {/* 3. TESLİMAT ADRESİ */}
+                    {/* TESLİMAT ADRESİ */}
                     <td className="p-4 align-top">
                         <div className="flex flex-col gap-2">
                             <span className="text-xs font-bold text-white uppercase tracking-wider border-b border-zinc-700 pb-1 w-fit">
@@ -169,19 +186,19 @@ export default function AdminOrdersPage() {
                         </div>
                     </td>
 
-                    {/* 4. TARİH */}
+                    {/* TARİH */}
                     <td className="p-4 align-top font-mono text-xs text-zinc-500">
                       {new Date(order.createdAt).toLocaleDateString('tr-TR')}
                       <br/>
                       {new Date(order.createdAt).toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'})}
                     </td>
 
-                    {/* 5. TUTAR */}
+                    {/* TUTAR */}
                     <td className="p-4 align-top font-mono text-white">
                       {Number(order.totalPrice).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
                     </td>
 
-                    {/* 6. DURUM (DÜZELTİLDİ: whitespace-nowrap eklendi) */}
+                    {/* DURUM */}
                     <td className="p-4 align-top">
                       <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-widest border whitespace-nowrap ${getStatusStyle(order.status)}`}>
                         {order.status === 'PAID' ? 'Ödeme Alındı' :
@@ -192,7 +209,7 @@ export default function AdminOrdersPage() {
                       </span>
                     </td>
                     
-                    {/* 7. İŞLEMLER */}
+                    {/* İŞLEMLER */}
                     <td className="p-4 align-top text-right space-y-2">
                       {order.status === 'PAID' && (
                         <button onClick={() => handleStatusChange(order.id, 'SHIPPED')} className="block w-full text-right text-xs font-bold text-blue-500 uppercase tracking-widest hover:text-white transition-colors">
