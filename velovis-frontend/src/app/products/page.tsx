@@ -86,7 +86,7 @@ export default function ProductsPage() {
         </h1>
         <div className="h-px w-full bg-zinc-800"></div>
         <div className="flex justify-between items-center mt-4 text-sm text-zinc-500 uppercase tracking-widest">
-          <span>Sonbahar / Kış 2025</span>
+          
           <span>{products.length} Ürün</span>
         </div>
       </div>

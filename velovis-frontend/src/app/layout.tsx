@@ -4,21 +4,20 @@ import "./globals.css";
 import Providers from "../app/lib/providers";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
 // --- METADATA AYARLARI ---
 export const metadata: Metadata = {
-  // Google ve Sosyal medya botları ana domaini buradan öğrenir.
   metadataBase: new URL('https://www.veloviswear.com'), 
 
   title: {
     default: "Velovis Wear",
-    template: "%s | Velovis Wear", // Alt sayfalarda örn: "Deri Ceket | Velovis Wear" yazar
+    template: "%s | Velovis Wear",
   },
   description: "Custom design, unique and premium clothes.",
 
-  // 2. Sosyal Medya Paylaşımları İçin (WhatsApp, Twitter, LinkedIn vb.)
   openGraph: {
     title: 'Velovis Wear',
     description: 'Custom design, unique and premium clothes.',
@@ -28,7 +27,6 @@ export const metadata: Metadata = {
     type: 'website',
   },
   
-  // 3. Robotlar (Google Botları) için izinler
   robots: {
     index: true,
     follow: true,
@@ -49,8 +47,39 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr">
-      {/* Body'e genel siyah tema ve fontu ekledik */}
       <body className={`${inter.className} bg-black text-white antialiased`}>
+        
+        {/* 2. META PIXEL KODU */}
+        <Script
+          id="fb-pixel"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              !function(f,b,e,v,n,t,s)
+              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+              n.queue=[];t=b.createElement(e);t.async=!0;
+              t.src=v;s=b.getElementsByTagName(e)[0];
+              s.parentNode.insertBefore(t,s)}(window, document,'script',
+              'https://connect.facebook.net/en_US/fbevents.js');
+              fbq('init', '744934802004617');
+              fbq('track', 'PageView');
+            `,
+          }}
+        />
+        
+        {/* 3. NOSCRIPT KODU */}
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: 'none' }}
+            src="https://www.facebook.com/tr?id=744934802004617&ev=PageView&noscript=1"
+            alt="facebook pixel"
+          />
+        </noscript>
+
         <Providers>
           
           {/* Tüm sayfayı kapsayan kutu */}
@@ -59,7 +88,7 @@ export default function RootLayout({
             {/* Header En Üstte */}
             <Header />
             
-            {/* Main: İçeriğin olduğu kısım. 'flex-1' ile boşluğu doldurur */}
+            {/* Main: İçeriğin olduğu kısım */}
             <main className="flex-1">
               {children}
             </main>
