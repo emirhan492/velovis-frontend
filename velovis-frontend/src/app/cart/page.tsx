@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
 import { useCartStore } from 'src/app/lib/store/cart.store';
 import { useAuthStore } from 'src/app/lib/store/auth.store'; 
+import * as fbq from 'src/app/lib/fpixel';
 
 export default function CartPage() {
   const router = useRouter();
@@ -25,6 +26,14 @@ export default function CartPage() {
   }, 0);
 
   const handleProceedToCheckout = () => {
+    // PIXEL INITIATE CHECKOUT
+    fbq.event('InitiateCheckout', {
+      content_ids: items.map((item) => item.product.id),
+      num_items: items.length, 
+      value: total,
+      currency: 'TRY',
+    });
+
     if (isAuthenticated) {
       router.push('/checkout');
     } else {

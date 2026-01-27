@@ -8,6 +8,7 @@ import { useAuthStore } from 'src/app/lib/store/auth.store';
 import { useCartStore } from 'src/app/lib/store/cart.store';
 import { ChevronLeftIcon, ChevronRightIcon, StarIcon, TrashIcon, PencilSquareIcon, XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import * as fbq from 'src/app/lib/fpixel';
 
 // --- TİP TANIMLAMALARI ---
 interface Comment {
@@ -127,6 +128,19 @@ export default function ProductDetailPage() {
     if (productId) fetchProduct();
   }, [productId]);
 
+  //PIXEL VIEW CONTENT
+  useEffect(() => {
+    if (product) {
+      fbq.event('ViewContent', {
+        content_name: product.name,
+        content_ids: [product.id],
+        content_type: 'product',
+        value: product.price,
+        currency: 'TRY',
+      });
+    }
+  }, [product]);
+
   // --- HANDLERS ---
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('tr-TR', {
@@ -155,7 +169,6 @@ export default function ProductDetailPage() {
   const handleAddToCart = async () => {
     setError(null); setSuccess(null);
     
-
     if (!selectedSize) { setError("Lütfen bir beden seçiniz."); return; }
     if (!product) return;
 
@@ -171,6 +184,16 @@ export default function ProductDetailPage() {
 
     try {
       await addItem(product.id, quantity, selectedSize);
+      
+      // PIXEL ADD TO CART
+      fbq.event('AddToCart', {
+        content_name: product.name,
+        content_ids: [product.id],
+        content_type: 'product',
+        value: product.price,
+        currency: 'TRY',
+      });
+
       setSuccess(`${product.name} (${selectedSize}) sepete eklendi.`);
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) { setError(err.message || "Hata oluştu."); }

@@ -1,8 +1,39 @@
-
+"use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
+import * as fbq from "@/app/lib/fpixel";
+import { useCartStore } from "@/app/lib/store/cart.store";
 
 export default function PaymentSuccessPage() {
+  const items = useCartStore((state) => state.items);
+  const fetchCart = useCartStore((state) => state.fetchCart);
+
+  useEffect(() => {
+    // PIXEL PURCHASE
+    const total = items.reduce((acc, item) => acc + (Number(item.product.price) * item.quantity), 0);
+    
+    if (items.length > 0) {
+      fbq.event('Purchase', {
+        currency: 'TRY',
+        value: total, 
+        content_type: 'product',
+        content_ids: items.map((item) => item.product.id), 
+        num_items: items.length,
+      });
+    } else {
+      fbq.event('Purchase', {
+        currency: 'TRY',
+        value: 0, 
+        content_type: 'product',
+      });
+    }
+
+
+    fetchCart();
+    
+  }, []);
+
   return (
     <div className="min-h-screen bg-black text-white font-sans flex items-center justify-center p-4">
       
